@@ -84,50 +84,120 @@ function render({ model: _model, el }: RenderProps<WidgetModel>) {
 		e.preventDefault();
 	});
 
-	window.addEventListener("mousemove", (e) => {
+	const onMouseMove = (e: MouseEvent) => {
+		const viewportWidth = window.innerWidth;
+		const viewportHeight = window.innerHeight;
+		const minVisible = 20;
+
 		if (isDragging) {
 			const dx = e.clientX - startX;
 			const dy = e.clientY - startY;
+			const rect = dialog.getBoundingClientRect();
+			const hHeight = header.offsetHeight;
 
-			dialog.style.left = `${startLeft + dx}px`;
-			dialog.style.top = `${startTop + dy}px`;
+			let newLeft = startLeft + dx;
+			let newTop = startTop + dy;
+
+			// Ensure at least some part of the header is visible
+			newLeft = Math.max(-(rect.width - minVisible), Math.min(newLeft, viewportWidth - minVisible));
+			newTop = Math.max(-(hHeight - minVisible), Math.min(newTop, viewportHeight - minVisible));
+
+			dialog.style.left = `${newLeft}px`;
+			dialog.style.top = `${newTop}px`;
 			dialog.style.margin = "0";
 		} else if (isResizing && currentResizer) {
 			const dx = e.clientX - startX;
 			const dy = e.clientY - startY;
 			const minWidth = 150;
 			const minHeight = 100;
+			const hHeight = header.offsetHeight;
 
 			if (currentResizer.includes("e")) {
-				dialog.style.width = `${Math.max(minWidth, startWidth + dx)}px`;
+				dialog.style.width = `${Math.max(minWidth, Math.min(startWidth + dx, viewportWidth))}px`;
 			}
 			if (currentResizer.includes("w")) {
-				const newWidth = Math.max(minWidth, startWidth - dx);
-				const actualDx = startWidth - newWidth;
+				let newWidth = Math.max(minWidth, Math.min(startWidth - dx, viewportWidth));
+				let newLeft = startLeft + (startWidth - newWidth);
+
+				// Ensure header visibility
+				if (newLeft < -(newWidth - minVisible)) {
+					newLeft = -(newWidth - minVisible);
+					newWidth = startLeft + startWidth - newLeft;
+				} else if (newLeft > viewportWidth - minVisible) {
+					newLeft = viewportWidth - minVisible;
+					newWidth = startLeft + startWidth - newLeft;
+				}
+
 				dialog.style.width = `${newWidth}px`;
-				dialog.style.left = `${startLeft + actualDx}px`;
+				dialog.style.left = `${newLeft}px`;
 			}
 			if (currentResizer.includes("s")) {
-				dialog.style.height = `${Math.max(minHeight, startHeight + dy)}px`;
+				dialog.style.height = `${Math.max(minHeight, Math.min(startHeight + dy, viewportHeight))}px`;
 			}
 			if (currentResizer.includes("n")) {
-				const newHeight = Math.max(minHeight, startHeight - dy);
-				const actualDy = startHeight - newHeight;
+				let newHeight = Math.max(minHeight, Math.min(startHeight - dy, viewportHeight));
+				let newTop = startTop + (startHeight - newHeight);
+
+				// Ensure header visibility
+				if (newTop < -(hHeight - minVisible)) {
+					newTop = -(hHeight - minVisible);
+					newHeight = startTop + startHeight - newTop;
+				} else if (newTop > viewportHeight - minVisible) {
+					newTop = viewportHeight - minVisible;
+					newHeight = startTop + startHeight - newTop;
+				}
+
 				dialog.style.height = `${newHeight}px`;
-				dialog.style.top = `${startTop + actualDy}px`;
+				dialog.style.top = `${newTop}px`;
 			}
 			dialog.style.margin = "0";
 		}
-	});
+	};
 
-	window.addEventListener("mouseup", () => {
+	const onMouseUp = () => {
 		isDragging = false;
 		isResizing = false;
 		currentResizer = null;
-	});
+	};
+
+	const onResize = () => {
+		const viewportWidth = window.innerWidth;
+		const viewportHeight = window.innerHeight;
+		const minVisible = 20;
+		const hHeight = header.offsetHeight;
+		const rect = dialog.getBoundingClientRect();
+
+		let newLeft = rect.left;
+		let newTop = rect.top;
+		let changed = false;
+
+		const constrainedLeft = Math.max(-(rect.width - minVisible), Math.min(newLeft, viewportWidth - minVisible));
+		if (constrainedLeft !== newLeft) {
+			newLeft = constrainedLeft;
+			changed = true;
+		}
+
+		const constrainedTop = Math.max(-(hHeight - minVisible), Math.min(newTop, viewportHeight - minVisible));
+		if (constrainedTop !== newTop) {
+			newTop = constrainedTop;
+			changed = true;
+		}
+
+		if (changed) {
+			dialog.style.left = `${newLeft}px`;
+			dialog.style.top = `${newTop}px`;
+		}
+	};
+
+	window.addEventListener("mousemove", onMouseMove);
+	window.addEventListener("mouseup", onMouseUp);
+	window.addEventListener("resize", onResize);
 
 	return () => {
 		dialog.remove();
+		window.removeEventListener("mousemove", onMouseMove);
+		window.removeEventListener("mouseup", onMouseUp);
+		window.removeEventListener("resize", onResize);
 	};
 }
 
