@@ -126,6 +126,10 @@
     transform: none;
 }
 
+.jphf-file-list-item {
+    cursor: default;
+}
+
 .jphf-file-list-item[aria-selected="true"] {
     background-color: var(--jp-layout-color3);
 }

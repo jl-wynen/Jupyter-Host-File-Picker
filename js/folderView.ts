@@ -38,6 +38,13 @@ export class FolderView extends EventTarget {
             }
             row.insertCell().textContent = info.modified;
 
+            row.addEventListener("mousedown", (event: MouseEvent) => {
+                if (event.detail > 1) {
+                    // Do not select text on double-click
+                    event.preventDefault();
+                }
+            })
+
             row.addEventListener("click", (event: MouseEvent) => {
                 event.preventDefault();
                 for (const row of table.querySelectorAll("tr")) {
