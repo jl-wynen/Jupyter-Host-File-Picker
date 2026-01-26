@@ -2,12 +2,13 @@ import type { RenderProps } from "@anywidget/types";
 import "./widget.css";
 
 interface WidgetModel {
+	dirPath: string;
 }
 
-function render({ model: _model, el }: RenderProps<WidgetModel>) {
+function render({ model, el }: RenderProps<WidgetModel>) {
 	el.classList.add("jupyter_host_filebrowser");
 	el.style.position = "relative";
-	el.style.height = "500px";
+	el.style.display="none";
 
 	// State for dragging and resizing
 	let isDragging = false;
@@ -37,7 +38,23 @@ function render({ model: _model, el }: RenderProps<WidgetModel>) {
 
 	const content = document.createElement("div");
 	content.className = "dialog-content";
-	content.textContent = "This is a dialog that you can drag by the header and resize from any border or corner.";
+
+	model.on("msg:custom", (message)=>{
+		if (message.type === "res:list-dir") {
+			const list = document.createElement("ul");
+			for (const f of message.payload) {
+				const li = document.createElement("li");
+				li.textContent = f;
+				li.addEventListener("click", () => {
+					model.set("dirPath", f);
+					model.send({ type: "req:list-dir", payload: {path: f}});
+				});
+				list.appendChild(li);
+			}
+			content.replaceChildren(list);
+		}
+	});
+	model.send({ type: "req:list-dir", payload: {path: model.get("dirPath")} });
 
 	dialog.appendChild(header);
 	dialog.appendChild(content);
