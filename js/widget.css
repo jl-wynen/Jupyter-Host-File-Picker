@@ -107,6 +107,7 @@
     padding: 16px;
     overflow: auto;
     height: calc(100% - 40px);
+    container-type: inline-size;
 }
 
 .my-dialog .close-button {
@@ -132,4 +133,49 @@
 
 .jphf-file-list-item[aria-selected="true"] {
     background-color: var(--jp-layout-color3);
+}
+
+.jphf-file-table {
+    width: 100%;
+    table-layout: auto;
+    border-collapse: collapse;
+}
+
+.jphf-file-table th {
+    text-align: left;
+}
+
+.jphf-file-icon-cell {
+    width: 1px;
+    white-space: nowrap;
+    padding-right: 0.5ch;
+}
+
+.jphf-file-name-cell {
+    max-width: 0;
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.jphf-file-size-cell {
+    width: 1px;
+    white-space: nowrap;
+    text-align: right;
+    padding-left: 1ch;
+}
+
+.jphf-file-modified-cell {
+    width: 1px;
+    white-space: nowrap;
+    text-align: right;
+    padding-left: 1ch;
+}
+
+@container (max-width: 400px) {
+    .jphf-file-size-cell,
+    .jphf-file-modified-cell {
+        display: none;
+    }
 }

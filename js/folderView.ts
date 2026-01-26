@@ -28,15 +28,22 @@ export class FolderView extends EventTarget {
             row.classList.add("jphf-file-list-item");
 
             const iconCell = row.insertCell();
+            iconCell.classList.add("jphf-file-icon-cell");
             iconForExtension(info.ext).element({container: iconCell});
 
-            row.insertCell().textContent = info.name;
-            if (info.size === null) {
-                row.insertCell();
-            } else {
-                row.insertCell().replaceChildren(humanSize(info.size));
+            const nameCell = row.insertCell();
+            nameCell.textContent = info.name;
+            nameCell.classList.add("jphf-file-name-cell");
+
+            const sizeCell = row.insertCell();
+            sizeCell.classList.add("jphf-file-size-cell");
+            if (info.size !== null) {
+                sizeCell.replaceChildren(humanSize(info.size));
             }
-            row.insertCell().textContent = info.modified;
+
+            const modifiedCell = row.insertCell();
+            modifiedCell.classList.add("jphf-file-modified-cell");
+            modifiedCell.textContent = info.modified;
 
             row.addEventListener("mousedown", (event: MouseEvent) => {
                 if (event.detail > 1) {
@@ -74,7 +81,26 @@ function createFileTableElement(): HTMLTableElement {
 
     const header = document.createElement("thead");
     const row = document.createElement("tr");
-    row.innerHTML = "<th></th><th>Name</th><th>Size</th><th>Modified</th>";
+
+    const iconTh = document.createElement("th");
+    iconTh.classList.add("jphf-file-icon-cell");
+    row.appendChild(iconTh);
+
+    const nameTh = document.createElement("th");
+    nameTh.textContent = "Name";
+    nameTh.classList.add("jphf-file-name-cell");
+    row.appendChild(nameTh);
+
+    const sizeTh = document.createElement("th");
+    sizeTh.textContent = "Size";
+    sizeTh.classList.add("jphf-file-size-cell");
+    row.appendChild(sizeTh);
+
+    const modifiedTh = document.createElement("th");
+    modifiedTh.textContent = "Modified";
+    modifiedTh.classList.add("jphf-file-modified-cell");
+    row.appendChild(modifiedTh);
+
     header.appendChild(row);
     table.appendChild(header);
 
