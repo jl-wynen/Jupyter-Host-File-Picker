@@ -137,9 +137,12 @@
     &[aria-selected="true"] {
         color: var(--jp-ui-inverse-font-color1);
         background-color: var(--jp-brand-color1);
+
+        & svg path, & svg g {
+            fill: #fff;
+        }
     }
 }
-
 
 .jphf-file-table {
     width: 100%;
@@ -155,6 +158,10 @@
     width: 1px;
     white-space: nowrap;
     padding-right: 0.5ch;
+
+    & svg {
+        display: block; /* place it in the center of the line */
+    }
 }
 
 .jphf-file-name-cell {

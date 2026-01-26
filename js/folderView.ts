@@ -29,7 +29,7 @@ export class FolderView extends EventTarget {
 
             const iconCell = row.insertCell();
             iconCell.classList.add("jphf-file-icon-cell");
-            iconForExtension(info.ext).element({container: iconCell});
+            iconForExtension(info.ext).element({container: iconCell, width: "1em", height: "1em"});
 
             const nameCell = row.insertCell();
             nameCell.textContent = info.name;
