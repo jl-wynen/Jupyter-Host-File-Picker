@@ -4,6 +4,7 @@ import {humanSize} from "./output.ts";
 
 export class FolderView extends EventTarget {
     container: HTMLDivElement;
+    private _loadingTimeout: number | null = null;
 
     constructor() {
         super();
@@ -14,7 +15,25 @@ export class FolderView extends EventTarget {
         return this.container;
     }
 
+    showLoading() {
+        this.clearLoading();
+        this._loadingTimeout = setTimeout(() => {
+            const loading = document.createElement("div");
+            loading.className = "jphf-loading";
+            loading.textContent = "Loading folder ...";
+            this.container.replaceChildren(loading);
+        }, 300);
+    }
+
+    private clearLoading() {
+        if (this._loadingTimeout !== null) {
+            clearTimeout(this._loadingTimeout);
+            this._loadingTimeout = null;
+        }
+    }
+
     populate(files: FileInfo[]) {
+        this.clearLoading();
         files.sort((a, b) => {
             // Folders first
             if (b.ext === "folder" && a.ext !== "folder") return 1;

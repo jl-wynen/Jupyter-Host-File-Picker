@@ -49,6 +49,7 @@ function render({model, el}: RenderProps<WidgetModel>) {
         const fileInfo = event.fileInfo[0];
         if (fileInfo.ext === "folder") {
             model.set("dirPath", fileInfo.path);
+            folderView.showLoading();
             model.send({type: "req:list-dir", payload: {path: fileInfo.path}});
         } else {
             model.set("selected", [fileInfo.path]);
@@ -63,6 +64,7 @@ function render({model, el}: RenderProps<WidgetModel>) {
             folderView.populate(fileList);
         }
     });
+    folderView.showLoading();
     model.send({type: "req:list-dir", payload: {path: model.get("dirPath")}});
 
     dialog.appendChild(header);

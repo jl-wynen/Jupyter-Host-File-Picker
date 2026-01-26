@@ -192,3 +192,9 @@
         display: none;
     }
 }
+
+.jphf-loading {
+    padding: 1em;
+    color: var(--jp-ui-font-color2);
+    font-style: italic;
+}
