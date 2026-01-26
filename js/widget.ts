@@ -1,221 +1,221 @@
-import type { RenderProps } from "@anywidget/types";
+import type {RenderProps} from "@anywidget/types";
 import "./widget.css";
+import {FileInfo} from "./comm.ts";
+import {FolderView} from "./folderView.ts";
 
 interface WidgetModel {
-	dirPath: string;
+    dirPath: string;
 }
 
-function render({ model, el }: RenderProps<WidgetModel>) {
-	el.classList.add("jupyter_host_filebrowser");
-	el.style.position = "relative";
-	el.style.display="none";
+function render({model, el}: RenderProps<WidgetModel>) {
+    el.classList.add("jupyter_host_filebrowser");
+    el.style.position = "relative";
+    el.style.display = "none";
 
-	// State for dragging and resizing
-	let isDragging = false;
-	let isResizing = false;
-	let currentResizer: string | null = null;
-	let startX = 0;
-	let startY = 0;
-	let startLeft = 0;
-	let startTop = 0;
-	let startWidth = 0;
-	let startHeight = 0;
+    // State for dragging and resizing
+    let isDragging = false;
+    let isResizing = false;
+    let currentResizer: string | null = null;
+    let startX = 0;
+    let startY = 0;
+    let startLeft = 0;
+    let startTop = 0;
+    let startWidth = 0;
+    let startHeight = 0;
 
-	const dialog = document.createElement("dialog");
-	dialog.className = "my-dialog";
+    const dialog = document.createElement("dialog");
+    dialog.className = "my-dialog";
 
-	const header = document.createElement("div");
-	header.className = "dialog-header";
+    const header = document.createElement("div");
+    header.className = "dialog-header";
 
-	const title = document.createElement("span");
-	title.textContent = "Draggable & Resizable Dialog";
-	header.appendChild(title);
+    const title = document.createElement("span");
+    title.textContent = "Select File";
+    header.appendChild(title);
 
-	const closeButton = document.createElement("button");
-	closeButton.className = "close-button";
-	closeButton.innerHTML = "&times;";
-	header.appendChild(closeButton);
+    const closeButton = document.createElement("button");
+    closeButton.className = "close-button";
+    closeButton.innerHTML = "&times;";
+    header.appendChild(closeButton);
 
-	const content = document.createElement("div");
-	content.className = "dialog-content";
+    const content = document.createElement("div");
+    content.className = "dialog-content";
+    const folderView = new FolderView();
+    content.appendChild(folderView.element);
 
-	model.on("msg:custom", (message)=>{
-		if (message.type === "res:list-dir") {
-			const list = document.createElement("ul");
-			for (const f of message.payload) {
-				const li = document.createElement("li");
-				li.textContent = f;
-				li.addEventListener("click", () => {
-					model.set("dirPath", f);
-					model.send({ type: "req:list-dir", payload: {path: f}});
-				});
-				list.appendChild(li);
-			}
-			content.replaceChildren(list);
-		}
-	});
-	model.send({ type: "req:list-dir", payload: {path: model.get("dirPath")} });
+    model.on("msg:custom", (message) => {
+        if (message.type === "res:list-dir") {
+            const fileList = message.payload as FileInfo[];
+            folderView.populate(fileList);
+        }
+    });
+    model.send({type: "req:list-dir", payload: {path: model.get("dirPath")}});
 
-	dialog.appendChild(header);
-	dialog.appendChild(content);
+    // 	li.addEventListener("click", () => {
+    // 		model.set("dirPath", f);
+    // 		model.send({ type: "req:list-dir", payload: {path: f}});
+    // 	});
 
-	// Add resizers
-	const resizers = ["n", "s", "e", "w", "nw", "ne", "sw", "se"];
-	resizers.forEach(direction => {
-		const resizer = document.createElement("div");
-		resizer.className = `resizer ${direction}`;
-		dialog.appendChild(resizer);
+    dialog.appendChild(header);
+    dialog.appendChild(content);
 
-		resizer.addEventListener("mousedown", (e) => {
-			isResizing = true;
-			currentResizer = direction;
-			startX = e.clientX;
-			startY = e.clientY;
-			const rect = dialog.getBoundingClientRect();
-			startLeft = rect.left;
-			startTop = rect.top;
-			startWidth = rect.width;
-			startHeight = rect.height;
-			e.preventDefault();
-			e.stopPropagation();
-		});
-	});
+    // Add resizers
+    const resizers = ["n", "s", "e", "w", "nw", "ne", "sw", "se"];
+    resizers.forEach(direction => {
+        const resizer = document.createElement("div");
+        resizer.className = `resizer ${direction}`;
+        dialog.appendChild(resizer);
 
-	document.body.appendChild(dialog);
+        resizer.addEventListener("mousedown", (e) => {
+            isResizing = true;
+            currentResizer = direction;
+            startX = e.clientX;
+            startY = e.clientY;
+            const rect = dialog.getBoundingClientRect();
+            startLeft = rect.left;
+            startTop = rect.top;
+            startWidth = rect.width;
+            startHeight = rect.height;
+            e.preventDefault();
+            e.stopPropagation();
+        });
+    });
 
-	dialog.show();
+    document.body.appendChild(dialog);
 
-	closeButton.addEventListener("click", () => {
-		dialog.close();
-	});
+    dialog.show();
 
-	header.addEventListener("mousedown", (e) => {
-		isDragging = true;
-		startX = e.clientX;
-		startY = e.clientY;
-		// Use getBoundingClientRect for accurate positioning relative to the viewport
-		const rect = dialog.getBoundingClientRect();
-		startLeft = rect.left;
-		startTop = rect.top;
+    closeButton.addEventListener("click", () => {
+        dialog.close();
+    });
 
-		e.preventDefault();
-	});
+    header.addEventListener("mousedown", (e) => {
+        isDragging = true;
+        startX = e.clientX;
+        startY = e.clientY;
+        // Use getBoundingClientRect for accurate positioning relative to the viewport
+        const rect = dialog.getBoundingClientRect();
+        startLeft = rect.left;
+        startTop = rect.top;
 
-	const onMouseMove = (e: MouseEvent) => {
-		const viewportWidth = window.innerWidth;
-		const viewportHeight = window.innerHeight;
-		const minVisible = 20;
+        e.preventDefault();
+    });
 
-		if (isDragging) {
-			const dx = e.clientX - startX;
-			const dy = e.clientY - startY;
-			const rect = dialog.getBoundingClientRect();
-			const hHeight = header.offsetHeight;
+    const onMouseMove = (e: MouseEvent) => {
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+        const minVisible = 20;
 
-			let newLeft = startLeft + dx;
-			let newTop = startTop + dy;
+        if (isDragging) {
+            const dx = e.clientX - startX;
+            const dy = e.clientY - startY;
+            const rect = dialog.getBoundingClientRect();
+            const hHeight = header.offsetHeight;
 
-			// Ensure at least some part of the header is visible
-			newLeft = Math.max(-(rect.width - minVisible), Math.min(newLeft, viewportWidth - minVisible));
-			newTop = Math.max(-(hHeight - minVisible), Math.min(newTop, viewportHeight - minVisible));
+            let newLeft = startLeft + dx;
+            let newTop = startTop + dy;
 
-			dialog.style.left = `${newLeft}px`;
-			dialog.style.top = `${newTop}px`;
-			dialog.style.margin = "0";
-		} else if (isResizing && currentResizer) {
-			const dx = e.clientX - startX;
-			const dy = e.clientY - startY;
-			const minWidth = 150;
-			const minHeight = 100;
-			const hHeight = header.offsetHeight;
+            // Ensure at least some part of the header is visible
+            newLeft = Math.max(-(rect.width - minVisible), Math.min(newLeft, viewportWidth - minVisible));
+            newTop = Math.max(-(hHeight - minVisible), Math.min(newTop, viewportHeight - minVisible));
 
-			if (currentResizer.includes("e")) {
-				dialog.style.width = `${Math.max(minWidth, Math.min(startWidth + dx, viewportWidth))}px`;
-			}
-			if (currentResizer.includes("w")) {
-				let newWidth = Math.max(minWidth, Math.min(startWidth - dx, viewportWidth));
-				let newLeft = startLeft + (startWidth - newWidth);
+            dialog.style.left = `${newLeft}px`;
+            dialog.style.top = `${newTop}px`;
+            dialog.style.margin = "0";
+        } else if (isResizing && currentResizer) {
+            const dx = e.clientX - startX;
+            const dy = e.clientY - startY;
+            const minWidth = 150;
+            const minHeight = 100;
+            const hHeight = header.offsetHeight;
 
-				// Ensure header visibility
-				if (newLeft < -(newWidth - minVisible)) {
-					newLeft = -(newWidth - minVisible);
-					newWidth = startLeft + startWidth - newLeft;
-				} else if (newLeft > viewportWidth - minVisible) {
-					newLeft = viewportWidth - minVisible;
-					newWidth = startLeft + startWidth - newLeft;
-				}
+            if (currentResizer.includes("e")) {
+                dialog.style.width = `${Math.max(minWidth, Math.min(startWidth + dx, viewportWidth))}px`;
+            }
+            if (currentResizer.includes("w")) {
+                let newWidth = Math.max(minWidth, Math.min(startWidth - dx, viewportWidth));
+                let newLeft = startLeft + (startWidth - newWidth);
 
-				dialog.style.width = `${newWidth}px`;
-				dialog.style.left = `${newLeft}px`;
-			}
-			if (currentResizer.includes("s")) {
-				dialog.style.height = `${Math.max(minHeight, Math.min(startHeight + dy, viewportHeight))}px`;
-			}
-			if (currentResizer.includes("n")) {
-				let newHeight = Math.max(minHeight, Math.min(startHeight - dy, viewportHeight));
-				let newTop = startTop + (startHeight - newHeight);
+                // Ensure header visibility
+                if (newLeft < -(newWidth - minVisible)) {
+                    newLeft = -(newWidth - minVisible);
+                    newWidth = startLeft + startWidth - newLeft;
+                } else if (newLeft > viewportWidth - minVisible) {
+                    newLeft = viewportWidth - minVisible;
+                    newWidth = startLeft + startWidth - newLeft;
+                }
 
-				// Ensure header visibility
-				if (newTop < -(hHeight - minVisible)) {
-					newTop = -(hHeight - minVisible);
-					newHeight = startTop + startHeight - newTop;
-				} else if (newTop > viewportHeight - minVisible) {
-					newTop = viewportHeight - minVisible;
-					newHeight = startTop + startHeight - newTop;
-				}
+                dialog.style.width = `${newWidth}px`;
+                dialog.style.left = `${newLeft}px`;
+            }
+            if (currentResizer.includes("s")) {
+                dialog.style.height = `${Math.max(minHeight, Math.min(startHeight + dy, viewportHeight))}px`;
+            }
+            if (currentResizer.includes("n")) {
+                let newHeight = Math.max(minHeight, Math.min(startHeight - dy, viewportHeight));
+                let newTop = startTop + (startHeight - newHeight);
 
-				dialog.style.height = `${newHeight}px`;
-				dialog.style.top = `${newTop}px`;
-			}
-			dialog.style.margin = "0";
-		}
-	};
+                // Ensure header visibility
+                if (newTop < -(hHeight - minVisible)) {
+                    newTop = -(hHeight - minVisible);
+                    newHeight = startTop + startHeight - newTop;
+                } else if (newTop > viewportHeight - minVisible) {
+                    newTop = viewportHeight - minVisible;
+                    newHeight = startTop + startHeight - newTop;
+                }
 
-	const onMouseUp = () => {
-		isDragging = false;
-		isResizing = false;
-		currentResizer = null;
-	};
+                dialog.style.height = `${newHeight}px`;
+                dialog.style.top = `${newTop}px`;
+            }
+            dialog.style.margin = "0";
+        }
+    };
 
-	const onResize = () => {
-		const viewportWidth = window.innerWidth;
-		const viewportHeight = window.innerHeight;
-		const minVisible = 20;
-		const hHeight = header.offsetHeight;
-		const rect = dialog.getBoundingClientRect();
+    const onMouseUp = () => {
+        isDragging = false;
+        isResizing = false;
+        currentResizer = null;
+    };
 
-		let newLeft = rect.left;
-		let newTop = rect.top;
-		let changed = false;
+    const onResize = () => {
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+        const minVisible = 20;
+        const hHeight = header.offsetHeight;
+        const rect = dialog.getBoundingClientRect();
 
-		const constrainedLeft = Math.max(-(rect.width - minVisible), Math.min(newLeft, viewportWidth - minVisible));
-		if (constrainedLeft !== newLeft) {
-			newLeft = constrainedLeft;
-			changed = true;
-		}
+        let newLeft = rect.left;
+        let newTop = rect.top;
+        let changed = false;
 
-		const constrainedTop = Math.max(-(hHeight - minVisible), Math.min(newTop, viewportHeight - minVisible));
-		if (constrainedTop !== newTop) {
-			newTop = constrainedTop;
-			changed = true;
-		}
+        const constrainedLeft = Math.max(-(rect.width - minVisible), Math.min(newLeft, viewportWidth - minVisible));
+        if (constrainedLeft !== newLeft) {
+            newLeft = constrainedLeft;
+            changed = true;
+        }
 
-		if (changed) {
-			dialog.style.left = `${newLeft}px`;
-			dialog.style.top = `${newTop}px`;
-		}
-	};
+        const constrainedTop = Math.max(-(hHeight - minVisible), Math.min(newTop, viewportHeight - minVisible));
+        if (constrainedTop !== newTop) {
+            newTop = constrainedTop;
+            changed = true;
+        }
 
-	window.addEventListener("mousemove", onMouseMove);
-	window.addEventListener("mouseup", onMouseUp);
-	window.addEventListener("resize", onResize);
+        if (changed) {
+            dialog.style.left = `${newLeft}px`;
+            dialog.style.top = `${newTop}px`;
+        }
+    };
 
-	return () => {
-		dialog.remove();
-		window.removeEventListener("mousemove", onMouseMove);
-		window.removeEventListener("mouseup", onMouseUp);
-		window.removeEventListener("resize", onResize);
-	};
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+    window.addEventListener("resize", onResize);
+
+    return () => {
+        dialog.remove();
+        window.removeEventListener("mousemove", onMouseMove);
+        window.removeEventListener("mouseup", onMouseUp);
+        window.removeEventListener("resize", onResize);
+    };
 }
 
-export default { render };
+export default {render};
