@@ -129,11 +129,17 @@
 
 .jphf-file-list-item {
     cursor: default;
+
+    &:hover {
+        background-color: var(--jp-layout-color2);
+    }
+
+    &[aria-selected="true"] {
+        color: var(--jp-ui-inverse-font-color1);
+        background-color: var(--jp-brand-color1);
+    }
 }
 
-.jphf-file-list-item[aria-selected="true"] {
-    background-color: var(--jp-layout-color3);
-}
 
 .jphf-file-table {
     width: 100%;
