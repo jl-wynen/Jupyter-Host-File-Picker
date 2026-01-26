@@ -1,10 +1,11 @@
 import type {RenderProps} from "@anywidget/types";
 import "./widget.css";
 import {FileInfo} from "./comm.ts";
-import {FolderView} from "./folderView.ts";
+import {FolderView, FileSelectedEvent} from "./folderView.ts";
 
 interface WidgetModel {
     dirPath: string;
+    selected: string[];
 }
 
 function render({model, el}: RenderProps<WidgetModel>) {
@@ -43,6 +44,19 @@ function render({model, el}: RenderProps<WidgetModel>) {
     const folderView = new FolderView();
     content.appendChild(folderView.element);
 
+    folderView.addEventListener("file-selected", (e: Event) => {
+        const event = e as FileSelectedEvent;
+        const fileInfo = event.fileInfo[0];
+        if (fileInfo.ext === "folder") {
+            model.set("dirPath", fileInfo.path);
+            model.send({type: "req:list-dir", payload: {path: fileInfo.path}});
+        } else {
+            model.set("selected", [fileInfo.path]);
+            model.save_changes();
+            dialog.close();
+        }
+    });
+
     model.on("msg:custom", (message) => {
         if (message.type === "res:list-dir") {
             const fileList = message.payload as FileInfo[];
@@ -50,11 +64,6 @@ function render({model, el}: RenderProps<WidgetModel>) {
         }
     });
     model.send({type: "req:list-dir", payload: {path: model.get("dirPath")}});
-
-    // 	li.addEventListener("click", () => {
-    // 		model.set("dirPath", f);
-    // 		model.send({ type: "req:list-dir", payload: {path: f}});
-    // 	});
 
     dialog.appendChild(header);
     dialog.appendChild(content);

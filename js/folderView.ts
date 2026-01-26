@@ -2,10 +2,11 @@ import {FileInfo} from "./comm.ts";
 import {iconForExtension} from "./icons.ts";
 import {humanSize} from "./output.ts";
 
-export class FolderView {
+export class FolderView extends EventTarget {
     container: HTMLDivElement;
 
     constructor() {
+        super();
         this.container = document.createElement("div");
     }
 
@@ -44,8 +45,19 @@ export class FolderView {
                 }
                 row.ariaSelected = "true";
             })
+
+            row.addEventListener("dblclick", (event: MouseEvent) => {
+                event.preventDefault();
+                this.dispatchEvent(new FileSelectedEvent([info]));
+            })
         }
         this.container.replaceChildren(table);
+    }
+}
+
+export class FileSelectedEvent extends Event {
+    constructor(public fileInfo: FileInfo[]) {
+        super("file-selected");
     }
 }
 

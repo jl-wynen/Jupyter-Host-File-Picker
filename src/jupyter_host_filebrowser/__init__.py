@@ -17,6 +17,7 @@ class Widget(anywidget.AnyWidget):
     _esm = pathlib.Path(__file__).parent / "static" / "widget.js"
     _css = pathlib.Path(__file__).parent / "static" / "widget.css"
     dirPath = traitlets.Unicode().tag(sync=True)
+    selected = traitlets.List().tag(sync=True)
 
 
 def make_widget(initial_path: os.PathLike[str] | str = "."):
