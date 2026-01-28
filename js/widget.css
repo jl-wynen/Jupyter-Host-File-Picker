@@ -110,10 +110,8 @@
 }
 
 .jphf-dialog-content {
-    padding: 16px;
-    overflow: auto;
-    flex: 1;
-    container-type: inline-size;
+    flex: 1 1 auto;
+    min-height: 0;
 }
 
 .jphf-dialog footer {
@@ -197,6 +195,41 @@
     fill: var(--jp-error-color2);
 }
 
+.jphf-folder-view {
+    height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.jphf-file-table {
+    width: 100%;
+    table-layout: auto;
+    border-collapse: collapse;
+
+    & td:first-child {
+        padding-left: 0.5em;
+    }
+
+    & td:last-child {
+        padding-right: 0.5em;
+    }
+}
+
+.jphf-file-table th {
+    background: var(--jp-layout-color0);
+    color: var(--jp-ui-font-color1);
+    text-align: left;
+    user-select: none;
+    border-bottom: 1px solid var(--jp-border-color1);
+
+    position: sticky;
+    top: 0;
+    z-index: 1;
+
+    &:nth-child(n+3) {
+        border-left: 1px solid var(--jp-border-color1);
+    }
+}
 
 .jphf-file-list-item {
     cursor: default;
@@ -220,16 +253,6 @@
             fill: var(--jp-brand-color1);
         }
     }
-}
-
-.jphf-file-table {
-    width: 100%;
-    table-layout: auto;
-    border-collapse: collapse;
-}
-
-.jphf-file-table th {
-    text-align: left;
 }
 
 .jphf-file-icon-cell {

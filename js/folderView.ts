@@ -10,6 +10,7 @@ export class FolderView extends EventTarget {
     constructor() {
         super();
         this.container = document.createElement("div");
+        this.container.classList.add("jphf-folder-view");
     }
 
     get element() {
@@ -47,9 +48,9 @@ export class FolderView extends EventTarget {
             return a.name.localeCompare(b.name);
         });
 
-        const table = createFileTableElement();
+        const [table, tbody] = createFileTableElement();
         for (const info of files) {
-            const row = table.insertRow();
+            const row = tbody.insertRow();
             row.classList.add("jphf-file-list-item");
 
             const iconCell = row.insertCell();
@@ -112,12 +113,12 @@ export class FileMarkedEvent extends Event {
     }
 }
 
-function createFileTableElement(): HTMLTableElement {
+function createFileTableElement(): [HTMLTableElement, HTMLTableSectionElement] {
     const table = document.createElement("table");
     table.classList.add("jphf-file-table");
 
-    const header = document.createElement("thead");
-    const row = document.createElement("tr");
+    const header = table.createTHead();
+    const row = header.insertRow();
 
     const iconTh = document.createElement("th");
     iconTh.classList.add("jphf-file-icon-cell");
@@ -138,11 +139,7 @@ function createFileTableElement(): HTMLTableElement {
     modifiedTh.classList.add("jphf-file-modified-cell");
     row.appendChild(modifiedTh);
 
-    header.appendChild(row);
-    table.appendChild(header);
+    const body = table.createTBody();
 
-    const body = document.createElement("tbody");
-    table.appendChild(body);
-
-    return table;
+    return [table, body];
 }
