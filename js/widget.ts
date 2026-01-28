@@ -1,9 +1,10 @@
 import type { RenderProps } from "@anywidget/types";
 import "./widget.css";
 import { FileInfo } from "./comm.ts";
-import { FolderView, FileSelectedEvent } from "./folderView.ts";
+import { FolderView, FileMarkedEvent, FileSelectedEvent } from "./folderView.ts";
 import { button, iconButton } from "./components.ts";
 import { backIcon, closeIcon, forwardIcon, upIcon } from "./icons.ts";
+import { SelectButton } from "./selectButton.ts";
 
 interface WidgetModel {
     dirPath: string;
@@ -37,9 +38,9 @@ function render({ model, el }: RenderProps<WidgetModel>) {
     const folderView = new FolderView();
     content.appendChild(folderView.element);
 
-    folderView.addEventListener("file-selected", (e: Event) => {
-        const event = e as FileSelectedEvent;
-        const fileInfo = event.fileInfo[0];
+    function selectFiles(fileInfos: FileInfo[]) {
+        // TODO handle multiple files
+        const fileInfo = fileInfos[0];
         if (fileInfo.type === "folder") {
             model.set("dirPath", fileInfo.path);
             folderView.showLoading();
@@ -49,8 +50,12 @@ function render({ model, el }: RenderProps<WidgetModel>) {
             model.save_changes();
             dialog.close();
         }
-    });
+    }
 
+    folderView.addEventListener("file-selected", (e: Event) => {
+        const event = e as FileSelectedEvent;
+        selectFiles(event.fileInfo);
+    });
     model.on("msg:custom", (message) => {
         // TODO check folder path to make sure we get the message for the correct folder
         if (message.type === "res:list-dir") {
@@ -63,8 +68,15 @@ function render({ model, el }: RenderProps<WidgetModel>) {
 
     dialog.appendChild(content);
 
-    const footer = renderFooter(dialog);
+    const [footer, selectButton] = renderFooter(dialog);
     dialog.appendChild(footer);
+    folderView.addEventListener("file-marked", (e: Event) => {
+        const event = e as FileMarkedEvent;
+        selectButton.onFileMarked(event.fileInfo);
+    });
+    selectButton.addEventListener("click", () => {
+        selectFiles(folderView.selectedFiles);
+    });
 
     // Add resizers
     const resizers = ["n", "s", "e", "w", "nw", "ne", "sw", "se"];
@@ -265,13 +277,15 @@ function renderHeader(dialog: HTMLDialogElement): HTMLElement {
     return header;
 }
 
-function renderFooter(dialog: HTMLDialogElement): HTMLElement {
+function renderFooter(dialog: HTMLDialogElement): [HTMLElement, SelectButton] {
     const footer = document.createElement("footer");
     footer.classList.add("jphf-footer");
 
     footer.append(button("Cancel", "Cancel", () => dialog.close()));
+    const selectButton = new SelectButton();
+    footer.append(selectButton.element);
 
-    return footer;
+    return [footer, selectButton];
 }
 
 export default { render };

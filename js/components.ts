@@ -9,11 +9,12 @@ import { LabIcon } from "@jupyterlab/ui-components";
 export function button(
     label: string,
     title: string,
-    callback: () => void,
+    callback: (this: HTMLButtonElement, ev: PointerEvent) => any,
 ): HTMLButtonElement {
     const button = document.createElement("button");
     button.textContent = label;
-    button.classList.add("jphf-icon-button");
+    button.classList.add("jphf-button");
+    button.classList.add("jupyter-button");
     button.setAttribute("aria-label", title);
     button.title = title;
     button.addEventListener("click", callback);
@@ -29,7 +30,7 @@ export function button(
 export function iconButton(
     icon: LabIcon,
     title: string,
-    callback: () => void,
+    callback: (this: HTMLButtonElement, ev: PointerEvent) => any,
 ): HTMLButtonElement {
     const button = document.createElement("button");
     button.classList.add("jphf-icon-button");

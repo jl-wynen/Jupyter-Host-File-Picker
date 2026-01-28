@@ -3,8 +3,9 @@ import { iconForFileType } from "./icons.ts";
 import { humanSize } from "./output.ts";
 
 export class FolderView extends EventTarget {
-    container: HTMLDivElement;
-    private _loadingTimeout: number | null = null;
+    readonly container: HTMLDivElement;
+    private selected: FileInfo[] = [];
+    private loadingTimeout: number | null = null;
 
     constructor() {
         super();
@@ -15,9 +16,13 @@ export class FolderView extends EventTarget {
         return this.container;
     }
 
+    get selectedFiles() {
+        return this.selected;
+    }
+
     showLoading() {
         this.clearLoading();
-        this._loadingTimeout = setTimeout(() => {
+        this.loadingTimeout = setTimeout(() => {
             const loading = document.createElement("div");
             loading.className = "jphf-loading";
             loading.textContent = "Loading folder ...";
@@ -26,9 +31,9 @@ export class FolderView extends EventTarget {
     }
 
     private clearLoading() {
-        if (this._loadingTimeout !== null) {
-            clearTimeout(this._loadingTimeout);
-            this._loadingTimeout = null;
+        if (this.loadingTimeout !== null) {
+            clearTimeout(this.loadingTimeout);
+            this.loadingTimeout = null;
         }
     }
 
@@ -82,6 +87,8 @@ export class FolderView extends EventTarget {
                     row.ariaSelected = "false";
                 }
                 row.ariaSelected = "true";
+                this.selected = [info];
+                this.dispatchEvent(new FileMarkedEvent([info]));
             });
 
             row.addEventListener("dblclick", (event: MouseEvent) => {
@@ -96,6 +103,12 @@ export class FolderView extends EventTarget {
 export class FileSelectedEvent extends Event {
     constructor(public fileInfo: FileInfo[]) {
         super("file-selected");
+    }
+}
+
+export class FileMarkedEvent extends Event {
+    constructor(public fileInfo: FileInfo[]) {
+        super("file-marked");
     }
 }
 

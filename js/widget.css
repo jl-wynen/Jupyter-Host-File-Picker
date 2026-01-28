@@ -126,6 +126,32 @@
     border-top: 1px solid var(--jp-border-color1);
 }
 
+.jphf-button[disabled] {
+    color: var(--jp-ui-font-color2);
+    background: var(--jp-layout-color1);
+    cursor: default;
+
+    &:hover {
+        color: var(--jp-ui-font-color2);
+        background: var(--jp-layout-color1);
+    }
+}
+
+.jphf-button:hover {
+    color: var(--jp-ui-font-color0);
+    background: var(--jp-layout-color3);
+}
+
+.jphf-select-button {
+    color: var(--jp-ui-inverse-font-color1);
+    background: var(--jp-brand-color1);
+
+    &:hover {
+        color: var(--jp-ui-inverse-font-color0);
+        background: var(--jp-brand-color2);
+    }
+}
+
 .jphf-icon-button {
     background: none;
     border: none;
