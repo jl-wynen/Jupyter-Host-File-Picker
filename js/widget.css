@@ -183,8 +183,15 @@
         color: var(--jp-ui-inverse-font-color1);
         background-color: var(--jp-brand-color1);
 
-        & svg path, & svg g {
+        /* Emulate Jupyter's effects in the file browser: */
+
+        & svg path.jp-icon-selectable,
+        svg g.jp-icon-selectable {
             fill: #fff;
+        }
+
+        & svg path.jp-icon-selectable-inverse, svg g.jp-icon-selectable-inverse {
+            fill: var(--jp-brand-color1);
         }
     }
 }
