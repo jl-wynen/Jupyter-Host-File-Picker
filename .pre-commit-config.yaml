@@ -40,11 +40,6 @@ repos:
         entry: |
           bash -c 'npm run fix:prettier "${@}"' --
 
-  - repo: https://github.com/pre-commit/mirrors-eslint
-    rev: 'v9.39.1'
-    hooks:
-      - id: eslint
-
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.14.14
     hooks:
