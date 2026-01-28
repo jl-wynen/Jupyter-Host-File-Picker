@@ -1,0 +1,83 @@
+repos:
+  - repo: local
+    hooks:
+      - id: uv-lock
+        name: lock dependencies
+        entry: uv lock
+        language: system
+        files: ^(uv\.lock|pyproject\.toml|uv\.toml)$
+        pass_filenames: false
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-added-large-files
+      - id: check-case-conflict
+      - id: check-illegal-windows-names
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-toml
+      - id: check-yaml
+      - id: detect-private-key
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+        args: [ --markdown-linebreak-ext=md ]
+
+  - repo: https://github.com/kynan/nbstripout
+    rev: 0.9.0
+    hooks:
+      - id: nbstripout
+        types: [ "jupyter" ]
+        args: [ "--drop-empty-cells",
+                "--extra-keys 'metadata.language_info.version cell.metadata.jp-MarkdownHeadingCollapsed cell.metadata.pycharm'" ]
+
+  - repo: local
+    hooks:
+      - id: app-prettier
+        name: run prettier
+        language: system
+        files: ^.*$
+        types_or: [ javascript, json ]
+        entry: |
+          bash -c 'npm run fix:prettier "${@}"' --
+
+  - repo: https://github.com/pre-commit/mirrors-eslint
+    rev: 'v9.39.1'
+    hooks:
+      - id: eslint
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.14.14
+    hooks:
+      - id: ruff
+        args: [ --fix ]
+        types_or: [ python, pyi, jupyter ]
+      - id: ruff-format
+        types_or: [ python, pyi ]
+
+  - repo: https://github.com/hukkin/mdformat
+    rev: 1.0.0
+    hooks:
+      - id: mdformat
+        additional_dependencies:
+          - mdformat-beautysh
+          - mdformat-ruff
+
+  - repo: https://github.com/crate-ci/typos
+    rev: v1.42.3
+    hooks:
+      - id: typos
+
+  - repo: https://github.com/pre-commit/pygrep-hooks
+    rev: v1.10.0
+    hooks:
+      - id: python-use-type-annotations
+      - id: rst-backticks
+      - id: rst-directive-colons
+      - id: rst-inline-touching-normal
+      - id: text-unicode-replacement-char
+
+  - repo: https://github.com/rhysd/actionlint
+    rev: v1.7.10
+    hooks:
+      - id: actionlint
