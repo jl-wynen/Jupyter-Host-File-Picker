@@ -17,6 +17,8 @@
     max-width: 100vw;
     max-height: 100vh;
     box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
 }
 
 .resizer {
@@ -106,30 +108,37 @@
 .jphf-dialog-content {
     padding: 16px;
     overflow: auto;
-    height: calc(100% - 40px);
+    flex: 1;
     container-type: inline-size;
 }
 
 .jphf-dialog footer {
-    background: var(--jp-layout-color2);
+    background: var(--jp-layout-color0);
     padding: 8px 12px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     user-select: none;
-    border-bottom: 1px solid var(--jp-border-color1);
+    border-top: 1px solid var(--jp-border-color1);
 }
 
 .jphf-icon-button {
     background: none;
     border: none;
-    /*font-size: 20px;*/
     cursor: pointer;
-    /*padding: 0 5px;*/
-    /*line-height: 1;*/
-    /*color: black;*/
-    /*transition: none;*/
-    /*margin: 0;*/
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    width: 1.5em;
+    height: 1.5em;
+    line-height: 0;
+
+    & svg {
+        width: 100%;
+        height: 100%;
+        display: block;
+    }
 
     & path {
         fill: var(--jp-ui-font-color1) !important;
@@ -147,8 +156,11 @@
 .jphf-close-button {
     background: var(--jp-layout-color4);
     border-radius: 50% !important;
-    width: 1.5em;
-    height: 1.5em;
+
+    & svg {
+        width: 75%;
+        height: 75%;
+    }
 }
 
 .jphf-close-button:hover path {
