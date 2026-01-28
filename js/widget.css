@@ -1,4 +1,4 @@
-.my-dialog {
+.jphf-dialog {
     padding: 0;
     border: 1px solid var(--jp-border-color1);
     border-radius: 4px;
@@ -88,14 +88,31 @@
     cursor: se-resize;
 }
 
-.my-dialog::backdrop {
-    background: rgba(0, 0, 0, 0.1);
-}
-
-.dialog-header {
+.jphf-dialog header {
     background: var(--jp-layout-color2);
     padding: 8px 12px;
-    cursor: move;
+    cursor: grab;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    user-select: none;
+    border-bottom: 1px solid var(--jp-border-color1);
+
+    &.jphf-dragging {
+        cursor: grabbing;
+    }
+}
+
+.jphf-dialog-content {
+    padding: 16px;
+    overflow: auto;
+    height: calc(100% - 40px);
+    container-type: inline-size;
+}
+
+.jphf-dialog footer {
+    background: var(--jp-layout-color2);
+    padding: 8px 12px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -103,29 +120,41 @@
     border-bottom: 1px solid var(--jp-border-color1);
 }
 
-.dialog-content {
-    padding: 16px;
-    overflow: auto;
-    height: calc(100% - 40px);
-    container-type: inline-size;
-}
-
-.my-dialog .close-button {
+.jphf-icon-button {
     background: none;
     border: none;
-    font-size: 20px;
+    /*font-size: 20px;*/
     cursor: pointer;
-    padding: 0 5px;
-    line-height: 1;
-    color: black;
-    transition: none;
-    margin: 0;
+    /*padding: 0 5px;*/
+    /*line-height: 1;*/
+    /*color: black;*/
+    /*transition: none;*/
+    /*margin: 0;*/
+
+    & path {
+        fill: var(--jp-ui-font-color1) !important;
+    }
+
+    &:hover {
+        background: var(--jp-layout-color3);
+
+        & path {
+            fill: var(--jp-ui-font-color0);
+        }
+    }
 }
 
-.my-dialog .close-button:hover {
-    color: red;
-    transform: none;
+.jphf-close-button {
+    background: var(--jp-layout-color4);
+    border-radius: 50% !important;
+    width: 1.5em;
+    height: 1.5em;
 }
+
+.jphf-close-button:hover path {
+    fill: var(--jp-error-color2);
+}
+
 
 .jphf-file-list-item {
     cursor: default;

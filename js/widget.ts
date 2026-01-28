@@ -2,6 +2,8 @@ import type { RenderProps } from "@anywidget/types";
 import "./widget.css";
 import { FileInfo } from "./comm.ts";
 import { FolderView, FileSelectedEvent } from "./folderView.ts";
+import { button, iconButton } from "./components.ts";
+import { backIcon, closeIcon, forwardIcon, upIcon } from "./icons.ts";
 
 interface WidgetModel {
     dirPath: string;
@@ -25,22 +27,13 @@ function render({ model, el }: RenderProps<WidgetModel>) {
     let startHeight = 0;
 
     const dialog = document.createElement("dialog");
-    dialog.className = "my-dialog";
+    dialog.className = "jphf-dialog";
 
-    const header = document.createElement("div");
-    header.className = "dialog-header";
-
-    const title = document.createElement("span");
-    title.textContent = "Select File";
-    header.appendChild(title);
-
-    const closeButton = document.createElement("button");
-    closeButton.className = "close-button";
-    closeButton.innerHTML = "&times;";
-    header.appendChild(closeButton);
+    const header = renderHeader(dialog);
+    dialog.appendChild(header);
 
     const content = document.createElement("div");
-    content.className = "dialog-content";
+    content.className = "jphf-dialog-content";
     const folderView = new FolderView();
     content.appendChild(folderView.element);
 
@@ -59,6 +52,7 @@ function render({ model, el }: RenderProps<WidgetModel>) {
     });
 
     model.on("msg:custom", (message) => {
+        // TODO check folder path to make sure we get the message for the correct folder
         if (message.type === "res:list-dir") {
             const fileList = message.payload as FileInfo[];
             folderView.populate(fileList);
@@ -67,8 +61,10 @@ function render({ model, el }: RenderProps<WidgetModel>) {
     folderView.showLoading();
     model.send({ type: "req:list-dir", payload: { path: model.get("dirPath") } });
 
-    dialog.appendChild(header);
     dialog.appendChild(content);
+
+    const footer = renderFooter(dialog);
+    dialog.appendChild(footer);
 
     // Add resizers
     const resizers = ["n", "s", "e", "w", "nw", "ne", "sw", "se"];
@@ -96,11 +92,9 @@ function render({ model, el }: RenderProps<WidgetModel>) {
 
     dialog.show();
 
-    closeButton.addEventListener("click", () => {
-        dialog.close();
-    });
-
+    // TODO extract
     header.addEventListener("mousedown", (e) => {
+        header.classList.add("jphf-dragging");
         isDragging = true;
         startX = e.clientX;
         startY = e.clientY;
@@ -198,6 +192,7 @@ function render({ model, el }: RenderProps<WidgetModel>) {
         isDragging = false;
         isResizing = false;
         currentResizer = null;
+        header.classList.remove("jphf-dragging");
     };
 
     const onResize = () => {
@@ -245,6 +240,38 @@ function render({ model, el }: RenderProps<WidgetModel>) {
         window.removeEventListener("mouseup", onMouseUp);
         window.removeEventListener("resize", onResize);
     };
+}
+
+function renderHeader(dialog: HTMLDialogElement): HTMLElement {
+    const header = document.createElement("header");
+    header.classList.add("jphf-nav-bar");
+
+    header.appendChild(iconButton(backIcon, "Previous folder", () => {}));
+    header.appendChild(iconButton(forwardIcon, "Next folder", () => {}));
+    header.appendChild(iconButton(upIcon, "Parent folder", () => {}));
+
+    const path = document.createElement("input");
+    path.value = "/home/l";
+    // Do not move the window from the input element:
+    path.addEventListener("mousedown", (e: MouseEvent) => e.stopPropagation());
+    header.appendChild(path);
+
+    const closeButton = iconButton(closeIcon, "Close the file browser", () => {
+        dialog.close();
+    });
+    closeButton.classList.add("jphf-close-button");
+    header.appendChild(closeButton);
+
+    return header;
+}
+
+function renderFooter(dialog: HTMLDialogElement): HTMLElement {
+    const footer = document.createElement("footer");
+    footer.classList.add("jphf-footer");
+
+    footer.append(button("Cancel", "Cancel", () => dialog.close()));
+
+    return footer;
 }
 
 export default { render };

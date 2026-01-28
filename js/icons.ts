@@ -8,9 +8,13 @@ import {
     jsonIcon,
     pythonIcon,
     spreadsheetIcon,
+    caretUpIcon,
+    caretRightIcon,
+    caretLeftIcon,
     pdfIcon,
     videoIcon,
     yamlIcon,
+    closeIcon as jpCloseIcon,
 } from "@jupyterlab/ui-components";
 import hdfSvg from "./assets/hdf.svg";
 
@@ -44,3 +48,8 @@ export function iconForFileType(fileType: string): LabIcon {
             return fileIcon;
     }
 }
+
+export const backIcon = caretLeftIcon;
+export const forwardIcon = caretRightIcon;
+export const upIcon = caretUpIcon;
+export const closeIcon = jpCloseIcon;
