@@ -1,7 +1,7 @@
-from pathlib import Path
+import mimetypes
 import os
 from datetime import datetime
-import mimetypes
+from pathlib import Path
 
 
 def inspect_file(path: Path) -> dict[str, str | int | None] | None:
@@ -13,7 +13,7 @@ def inspect_file(path: Path) -> dict[str, str | int | None] | None:
 
     size = None if path.is_dir() else stat.st_size
     return {
-        "modified": datetime.fromtimestamp(stat.st_mtime).isoformat(),
+        "modified": datetime.fromtimestamp(stat.st_mtime).isoformat(),  # noqa: DTZ006
         "name": path.name,
         "path": os.fspath(path),
         "size": size,
@@ -52,7 +52,7 @@ def _deduce_file_type(path: Path) -> str:
             return "yaml"
         case ".pyi":
             return "python"
-        case "hdf" | "hdf5" | "h5":
+        case ".hdf" | ".hdf5" | ".h5":
             return "hdf"
 
     return "file"
