@@ -4,7 +4,7 @@ import pathlib
 import anywidget
 import traitlets
 from pathlib import Path
-from datetime import datetime
+from ._filesystem import inspect_file
 import os
 
 try:
@@ -34,29 +34,3 @@ def handle(widget, content, buffers):
         path = Path(content["payload"]["path"])
         files = [res for p in path.iterdir() if (res := inspect_file(p))]
         widget.send({"type": "res:list-dir", "payload": files})
-
-
-def inspect_file(path: Path) -> dict[str, str | int | None] | None:
-    try:
-        stat = path.stat()
-    except FileNotFoundError:
-        return None
-
-    base = {
-        "path": os.fspath(path),
-        "name": path.name,
-        "modified": datetime.fromtimestamp(stat.st_mtime).isoformat(),
-    }
-
-    if path.is_dir():
-        return {
-            **base,
-            "ext": "folder",
-            "size": None,
-        }
-
-    return {
-        **base,
-        "ext": path.suffix,
-        "size": stat.st_size,
-    }

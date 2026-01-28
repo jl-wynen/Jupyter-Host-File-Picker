@@ -2,32 +2,32 @@ import {
     fileIcon,
     folderIcon,
     markdownIcon,
-    LabIcon,
+    LabIcon, imageIcon,
     notebookIcon,
     jsonIcon,
     pythonIcon, yamlIcon,
 } from "@jupyterlab/ui-components";
 import hdfSvg from "./assets/hdf.svg";
 
-export function iconForExtension(extension: string): LabIcon {
-    switch (extension) {
+const hdfIcon = new LabIcon({name: "jphf:hdf", svgstr: hdfSvg});
+
+export function iconForFileType(fileType: string): LabIcon {
+    switch (fileType) {
         case "folder":
             return folderIcon;
-        case ".hdf":
-        case ".hdf5":
-        case ".h5":
-            return new LabIcon({name: "jphf:hdf", svgstr: hdfSvg});
-        case ".ipynb":
+        case "hdf":
+            return hdfIcon;
+        case "image":
+            return imageIcon;
+        case "ipynb":
             return notebookIcon;
-        case ".json":
+        case "json":
             return jsonIcon;
-        case ".md":
+        case "markdown":
             return markdownIcon;
-        case ".py":
-        case ".pyi":
+        case "python":
             return pythonIcon;
-        case ".yaml":
-        case ".yml":
+        case "yaml":
             return yamlIcon;
         default:
             return fileIcon;

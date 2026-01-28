@@ -47,7 +47,7 @@ function render({model, el}: RenderProps<WidgetModel>) {
     folderView.addEventListener("file-selected", (e: Event) => {
         const event = e as FileSelectedEvent;
         const fileInfo = event.fileInfo[0];
-        if (fileInfo.ext === "folder") {
+        if (fileInfo.type === "folder") {
             model.set("dirPath", fileInfo.path);
             folderView.showLoading();
             model.send({type: "req:list-dir", payload: {path: fileInfo.path}});

@@ -1,5 +1,5 @@
 import {FileInfo} from "./comm.ts";
-import {iconForExtension} from "./icons.ts";
+import {iconForFileType} from "./icons.ts";
 import {humanSize} from "./output.ts";
 
 export class FolderView extends EventTarget {
@@ -36,7 +36,8 @@ export class FolderView extends EventTarget {
         this.clearLoading();
         files.sort((a, b) => {
             // Folders first
-            if (b.ext === "folder" && a.ext !== "folder") return 1;
+            if (a.type === "folder" && b.type !== "folder") return -1;
+            if (a.type !== "folder" && b.type === "folder") return 1;
             // then alphabetically
             return a.name.localeCompare(b.name);
         });
@@ -48,7 +49,8 @@ export class FolderView extends EventTarget {
 
             const iconCell = row.insertCell();
             iconCell.classList.add("jphf-file-icon-cell");
-            iconForExtension(info.ext).element({container: iconCell, width: "1em", height: "1em"});
+            console.log(info.name, info.type);
+            iconForFileType(info.type).element({container: iconCell, width: "1em", height: "1em"});
 
             const nameCell = row.insertCell();
             nameCell.textContent = info.name;
