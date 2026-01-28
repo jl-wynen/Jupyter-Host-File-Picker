@@ -1,14 +1,14 @@
-import type {RenderProps} from "@anywidget/types";
+import type { RenderProps } from "@anywidget/types";
 import "./widget.css";
-import {FileInfo} from "./comm.ts";
-import {FolderView, FileSelectedEvent} from "./folderView.ts";
+import { FileInfo } from "./comm.ts";
+import { FolderView, FileSelectedEvent } from "./folderView.ts";
 
 interface WidgetModel {
     dirPath: string;
     selected: string[];
 }
 
-function render({model, el}: RenderProps<WidgetModel>) {
+function render({ model, el }: RenderProps<WidgetModel>) {
     el.classList.add("jupyter_host_filebrowser");
     el.style.position = "relative";
     el.style.display = "none";
@@ -50,7 +50,7 @@ function render({model, el}: RenderProps<WidgetModel>) {
         if (fileInfo.type === "folder") {
             model.set("dirPath", fileInfo.path);
             folderView.showLoading();
-            model.send({type: "req:list-dir", payload: {path: fileInfo.path}});
+            model.send({ type: "req:list-dir", payload: { path: fileInfo.path } });
         } else {
             model.set("selected", [fileInfo.path]);
             model.save_changes();
@@ -65,14 +65,14 @@ function render({model, el}: RenderProps<WidgetModel>) {
         }
     });
     folderView.showLoading();
-    model.send({type: "req:list-dir", payload: {path: model.get("dirPath")}});
+    model.send({ type: "req:list-dir", payload: { path: model.get("dirPath") } });
 
     dialog.appendChild(header);
     dialog.appendChild(content);
 
     // Add resizers
     const resizers = ["n", "s", "e", "w", "nw", "ne", "sw", "se"];
-    resizers.forEach(direction => {
+    resizers.forEach((direction) => {
         const resizer = document.createElement("div");
         resizer.className = `resizer ${direction}`;
         dialog.appendChild(resizer);
@@ -127,8 +127,14 @@ function render({model, el}: RenderProps<WidgetModel>) {
             let newTop = startTop + dy;
 
             // Ensure at least some part of the header is visible
-            newLeft = Math.max(-(rect.width - minVisible), Math.min(newLeft, viewportWidth - minVisible));
-            newTop = Math.max(-(hHeight - minVisible), Math.min(newTop, viewportHeight - minVisible));
+            newLeft = Math.max(
+                -(rect.width - minVisible),
+                Math.min(newLeft, viewportWidth - minVisible),
+            );
+            newTop = Math.max(
+                -(hHeight - minVisible),
+                Math.min(newTop, viewportHeight - minVisible),
+            );
 
             dialog.style.left = `${newLeft}px`;
             dialog.style.top = `${newTop}px`;
@@ -144,7 +150,10 @@ function render({model, el}: RenderProps<WidgetModel>) {
                 dialog.style.width = `${Math.max(minWidth, Math.min(startWidth + dx, viewportWidth))}px`;
             }
             if (currentResizer.includes("w")) {
-                let newWidth = Math.max(minWidth, Math.min(startWidth - dx, viewportWidth));
+                let newWidth = Math.max(
+                    minWidth,
+                    Math.min(startWidth - dx, viewportWidth),
+                );
                 let newLeft = startLeft + (startWidth - newWidth);
 
                 // Ensure header visibility
@@ -163,7 +172,10 @@ function render({model, el}: RenderProps<WidgetModel>) {
                 dialog.style.height = `${Math.max(minHeight, Math.min(startHeight + dy, viewportHeight))}px`;
             }
             if (currentResizer.includes("n")) {
-                let newHeight = Math.max(minHeight, Math.min(startHeight - dy, viewportHeight));
+                let newHeight = Math.max(
+                    minHeight,
+                    Math.min(startHeight - dy, viewportHeight),
+                );
                 let newTop = startTop + (startHeight - newHeight);
 
                 // Ensure header visibility
@@ -199,13 +211,19 @@ function render({model, el}: RenderProps<WidgetModel>) {
         let newTop = rect.top;
         let changed = false;
 
-        const constrainedLeft = Math.max(-(rect.width - minVisible), Math.min(newLeft, viewportWidth - minVisible));
+        const constrainedLeft = Math.max(
+            -(rect.width - minVisible),
+            Math.min(newLeft, viewportWidth - minVisible),
+        );
         if (constrainedLeft !== newLeft) {
             newLeft = constrainedLeft;
             changed = true;
         }
 
-        const constrainedTop = Math.max(-(hHeight - minVisible), Math.min(newTop, viewportHeight - minVisible));
+        const constrainedTop = Math.max(
+            -(hHeight - minVisible),
+            Math.min(newTop, viewportHeight - minVisible),
+        );
         if (constrainedTop !== newTop) {
             newTop = constrainedTop;
             changed = true;
@@ -229,4 +247,4 @@ function render({model, el}: RenderProps<WidgetModel>) {
     };
 }
 
-export default {render};
+export default { render };

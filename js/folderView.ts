@@ -1,6 +1,6 @@
-import {FileInfo} from "./comm.ts";
-import {iconForFileType} from "./icons.ts";
-import {humanSize} from "./output.ts";
+import { FileInfo } from "./comm.ts";
+import { iconForFileType } from "./icons.ts";
+import { humanSize } from "./output.ts";
 
 export class FolderView extends EventTarget {
     container: HTMLDivElement;
@@ -50,7 +50,11 @@ export class FolderView extends EventTarget {
             const iconCell = row.insertCell();
             iconCell.classList.add("jphf-file-icon-cell");
             console.log(info.name, info.type);
-            iconForFileType(info.type).element({container: iconCell, width: "1em", height: "1em"});
+            iconForFileType(info.type).element({
+                container: iconCell,
+                width: "1em",
+                height: "1em",
+            });
 
             const nameCell = row.insertCell();
             nameCell.textContent = info.name;
@@ -71,7 +75,7 @@ export class FolderView extends EventTarget {
                     // Do not select text on double-click
                     event.preventDefault();
                 }
-            })
+            });
 
             row.addEventListener("click", (event: MouseEvent) => {
                 event.preventDefault();
@@ -79,12 +83,12 @@ export class FolderView extends EventTarget {
                     row.ariaSelected = "false";
                 }
                 row.ariaSelected = "true";
-            })
+            });
 
             row.addEventListener("dblclick", (event: MouseEvent) => {
                 event.preventDefault();
                 this.dispatchEvent(new FileSelectedEvent([info]));
-            })
+            });
         }
         this.container.replaceChildren(table);
     }
