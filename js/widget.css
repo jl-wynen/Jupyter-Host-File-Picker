@@ -94,18 +94,39 @@
     cursor: se-resize;
 }
 
-.jphf-dialog header {
+.jphf-nav-bar {
     background: var(--jp-layout-color2);
     padding: 8px 12px;
     cursor: grab;
     display: flex;
-    justify-content: space-between;
     align-items: center;
     user-select: none;
     border-bottom: 1px solid var(--jp-border-color1);
+    gap: 8px;
 
     &.jphf-dragging {
         cursor: grabbing;
+    }
+
+    & input[type="text"] {
+        flex: 1;
+        margin: 0 4em;
+        min-width: 0;
+        background: var(--jp-layout-color1);
+        color: var(--jp-ui-font-color1);
+        border: 1px solid var(--jp-border-color2);
+        border-radius: 2px;
+        padding: 2px 4px;
+
+        &:focus {
+            outline: none;
+            border: 1px solid var(--jp-brand-color1);
+        }
+
+        &::selection {
+            background: var(--jp-editor-selected-background);
+        }
+
     }
 }
 
