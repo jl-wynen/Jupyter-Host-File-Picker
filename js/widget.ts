@@ -30,7 +30,7 @@ function render({ model, el }: RenderProps<WidgetModel>) {
     const dialog = document.createElement("dialog");
     dialog.className = "jphf-dialog";
 
-    const header = renderHeader(dialog);
+    const [header, pathInput] = renderHeader(dialog, model.get("dirPath"));
     dialog.appendChild(header);
 
     const content = document.createElement("div");
@@ -43,6 +43,7 @@ function render({ model, el }: RenderProps<WidgetModel>) {
         const fileInfo = fileInfos[0];
         if (fileInfo.type === "folder") {
             model.set("dirPath", fileInfo.path);
+            pathInput.value = fileInfo.path;
             folderView.showLoading();
             model.send({ type: "req:list-dir", payload: { path: fileInfo.path } });
         } else {
@@ -254,7 +255,10 @@ function render({ model, el }: RenderProps<WidgetModel>) {
     };
 }
 
-function renderHeader(dialog: HTMLDialogElement): HTMLElement {
+function renderHeader(
+    dialog: HTMLDialogElement,
+    currentPath: string,
+): [HTMLElement, HTMLInputElement] {
     const header = document.createElement("header");
     header.classList.add("jphf-nav-bar");
 
@@ -263,7 +267,8 @@ function renderHeader(dialog: HTMLDialogElement): HTMLElement {
     header.appendChild(iconButton(upIcon, "Parent folder", () => {}));
 
     const path = document.createElement("input");
-    path.value = "/home/l";
+    path.type = "text";
+    path.value = currentPath;
     // Do not move the window from the input element:
     path.addEventListener("mousedown", (e: MouseEvent) => e.stopPropagation());
     header.appendChild(path);
@@ -274,7 +279,7 @@ function renderHeader(dialog: HTMLDialogElement): HTMLElement {
     closeButton.classList.add("jphf-close-button");
     header.appendChild(closeButton);
 
-    return header;
+    return [header, path];
 }
 
 function renderFooter(dialog: HTMLDialogElement): [HTMLElement, SelectButton] {
