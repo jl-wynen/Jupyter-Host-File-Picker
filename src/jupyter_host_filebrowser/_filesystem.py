@@ -23,7 +23,10 @@ def inspect_file(path: Path) -> dict[str, str | int | None] | None:
 
 _KNOWN_MIMETYPES = {
     "application/json": "json",
+    "application/pdf": "pdf",
     "text/markdown": "markdown",
+    "text/csv": "spreadsheet",
+    "text/tab-separated-values": "spreadsheet",
     "text/x-python": "python",
 }
 
@@ -41,8 +44,11 @@ def _deduce_file_type(path: Path) -> str:
         return _KNOWN_MIMETYPES[mimetype]
     except KeyError:
         pass
-    if mimetype is not None and mimetype.startswith("image/"):
-        return "image"
+    if mimetype is not None:
+        if mimetype.startswith("image/"):
+            return "image"
+        if mimetype.startswith("video/"):
+            return "video"
 
     # Files without a mimetype known to Python:
     match path.suffix.lower():

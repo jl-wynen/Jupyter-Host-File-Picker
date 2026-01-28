@@ -49,7 +49,6 @@ export class FolderView extends EventTarget {
 
             const iconCell = row.insertCell();
             iconCell.classList.add("jphf-file-icon-cell");
-            console.log(info.name, info.type);
             iconForFileType(info.type).element({
                 container: iconCell,
                 width: "1em",

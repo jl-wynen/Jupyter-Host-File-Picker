@@ -7,6 +7,9 @@ import {
     notebookIcon,
     jsonIcon,
     pythonIcon,
+    spreadsheetIcon,
+    pdfIcon,
+    videoIcon,
     yamlIcon,
 } from "@jupyterlab/ui-components";
 import hdfSvg from "./assets/hdf.svg";
@@ -27,8 +30,14 @@ export function iconForFileType(fileType: string): LabIcon {
             return jsonIcon;
         case "markdown":
             return markdownIcon;
+        case "pdf":
+            return pdfIcon;
         case "python":
             return pythonIcon;
+        case "spreadsheet":
+            return spreadsheetIcon;
+        case "video":
+            return videoIcon;
         case "yaml":
             return yamlIcon;
         default:
