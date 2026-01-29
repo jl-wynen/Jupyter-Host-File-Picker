@@ -7,8 +7,8 @@ import { backIcon, closeIcon, forwardIcon, upIcon } from "./icons.ts";
 import { SelectButton } from "./selectButton.ts";
 
 interface WidgetModel {
-    dirPath: string;
-    selected: string[];
+    _dirPath: string;
+    _selected: string[];
 }
 
 function render({ model, el }: RenderProps<WidgetModel>) {
@@ -30,7 +30,7 @@ function render({ model, el }: RenderProps<WidgetModel>) {
     const dialog = document.createElement("dialog");
     dialog.className = "jphf-dialog";
 
-    const [header, pathInput] = renderHeader(dialog, model.get("dirPath"));
+    const [header, pathInput] = renderHeader(dialog, model.get("_dirPath"));
     dialog.appendChild(header);
 
     const content = document.createElement("div");
@@ -42,12 +42,12 @@ function render({ model, el }: RenderProps<WidgetModel>) {
         // TODO handle multiple files
         const fileInfo = fileInfos[0];
         if (fileInfo.type === "folder") {
-            model.set("dirPath", fileInfo.path);
+            model.set("_dirPath", fileInfo.path);
             pathInput.value = fileInfo.path;
             folderView.showLoading();
             model.send({ type: "req:list-dir", payload: { path: fileInfo.path } });
         } else {
-            model.set("selected", [fileInfo.path]);
+            model.set("_selected", [fileInfo.path]);
             model.save_changes();
             dialog.close();
         }
@@ -65,7 +65,7 @@ function render({ model, el }: RenderProps<WidgetModel>) {
         }
     });
     folderView.showLoading();
-    model.send({ type: "req:list-dir", payload: { path: model.get("dirPath") } });
+    model.send({ type: "req:list-dir", payload: { path: model.get("_dirPath") } });
 
     dialog.appendChild(content);
 
