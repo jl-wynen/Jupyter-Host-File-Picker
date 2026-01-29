@@ -174,7 +174,7 @@
 .jphf-icon-button {
     background: none;
     border: none;
-    cursor: pointer;
+    cursor: default;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -200,6 +200,19 @@
             fill: var(--jp-ui-font-color0);
         }
     }
+
+    &[disabled] {
+        & path {
+            fill: var(--jp-ui-font-color3) !important;
+        }
+
+        &:hover {
+            & path {
+            fill: var(--jp-ui-font-color3) !important;
+            }
+            background: none;
+        }
+    }
 }
 
 .jphf-close-button {
@@ -210,10 +223,10 @@
         width: 75%;
         height: 75%;
     }
-}
 
-.jphf-close-button:hover path {
-    fill: var(--jp-error-color2);
+    &:hover {
+        background: var(--jp-error-color1);
+    }
 }
 
 .jphf-folder-view {
