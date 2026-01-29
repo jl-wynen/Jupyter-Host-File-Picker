@@ -262,8 +262,12 @@ function renderHeader(
     const header = document.createElement("header");
     header.classList.add("jphf-nav-bar");
 
-    header.appendChild(iconButton(backIcon, "Previous folder", () => {}));
-    header.appendChild(iconButton(forwardIcon, "Next folder", () => {}));
+    const backButton = iconButton(backIcon, "Previous folder", () => {});
+    backButton.setAttribute("disabled", "");
+    header.appendChild(backButton);
+    const forwardButton = iconButton(forwardIcon, "Next folder", () => {});
+    forwardButton.setAttribute("disabled", "");
+    header.appendChild(forwardButton);
     header.appendChild(iconButton(upIcon, "Parent folder", () => {}));
 
     const path = document.createElement("input");
