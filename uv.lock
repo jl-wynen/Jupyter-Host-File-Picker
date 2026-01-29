@@ -672,7 +672,7 @@ wheels = [
 ]
 
 [[package]]
-name = "jupyter-host-filebrowser"
+name = "jupyter-host-file-picker"
 version = "0.0.0"
 source = { editable = "." }
 dependencies = [
