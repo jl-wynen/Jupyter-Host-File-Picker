@@ -12,7 +12,7 @@ interface WidgetModel {
 }
 
 function render({ model, el }: RenderProps<WidgetModel>) {
-    el.classList.add("jupyter_host_filebrowser");
+    el.classList.add("jupyter-host-file-picker");
     el.style.position = "relative";
     el.style.display = "none";
 
@@ -273,7 +273,7 @@ function renderHeader(
     path.addEventListener("mousedown", (e: MouseEvent) => e.stopPropagation());
     header.appendChild(path);
 
-    const closeButton = iconButton(closeIcon, "Close the file browser", () => {
+    const closeButton = iconButton(closeIcon, "Close the file picker", () => {
         dialog.close();
     });
     closeButton.classList.add("jphf-close-button");

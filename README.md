@@ -1,15 +1,15 @@
-# jupyter_host_filebrowser
+# jupyter_host_file_picker
 
 ## Installation
 
 ```sh
-pip install jupyter_host_filebrowser
+pip install jupyter_host_file_picker
 ```
 
 or with [uv](https://github.com/astral-sh/uv):
 
 ```sh
-uv add jupyter_host_filebrowser
+uv add jupyter_host_file_picker
 ```
 
 ## Development

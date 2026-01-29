@@ -1,7 +1,7 @@
 {
     "scripts": {
         "dev": "npm run build -- --sourcemap=inline --watch",
-        "build": "esbuild js/widget.ts --minify --format=esm --bundle --outdir=src/jupyter_host_filebrowser/static --loader:.svg=text",
+        "build": "esbuild js/widget.ts --minify --format=esm --bundle --outdir=src/jupyter_host_file_picker/static --loader:.svg=text",
         "fix:prettier": "npm run lint:prettier -- --write",
         "lint:prettier": "prettier --config package.json --check",
         "typecheck": "tsc --noEmit"

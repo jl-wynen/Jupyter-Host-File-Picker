@@ -12,7 +12,7 @@ import traitlets
 from ._filesystem import inspect_file
 
 try:
-    __version__ = importlib.metadata.version("jupyter_host_filebrowser")
+    __version__ = importlib.metadata.version("jupyter_host_file_picker")
 except importlib.metadata.PackageNotFoundError:
     __version__ = "unknown"
 
