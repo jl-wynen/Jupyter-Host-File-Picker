@@ -5,6 +5,7 @@ import { FolderView, FileMarkedEvent, FileSelectedEvent } from "./folderView.ts"
 import { button, iconButton } from "./components.ts";
 import { backIcon, closeIcon, forwardIcon, upIcon } from "./icons.ts";
 import { SelectButton } from "./selectButton.ts";
+import { makeDraggable } from "./windowing.ts";
 
 interface WidgetModel {
     _dirPath: string;
@@ -17,7 +18,6 @@ function render({ model, el }: RenderProps<WidgetModel>) {
     el.style.display = "none";
 
     // State for dragging and resizing
-    let isDragging = false;
     let isResizing = false;
     let currentResizer: string | null = null;
     let startX = 0;
@@ -105,48 +105,12 @@ function render({ model, el }: RenderProps<WidgetModel>) {
 
     dialog.show();
 
-    // TODO extract
-    header.addEventListener("mousedown", (e) => {
-        header.classList.add("jphf-dragging");
-        isDragging = true;
-        startX = e.clientX;
-        startY = e.clientY;
-        // Use getBoundingClientRect for accurate positioning relative to the viewport
-        const rect = dialog.getBoundingClientRect();
-        startLeft = rect.left;
-        startTop = rect.top;
-
-        e.preventDefault();
-    });
-
     const onMouseMove = (e: MouseEvent) => {
         const viewportWidth = window.innerWidth;
         const viewportHeight = window.innerHeight;
         const minVisible = 20;
 
-        if (isDragging) {
-            const dx = e.clientX - startX;
-            const dy = e.clientY - startY;
-            const rect = dialog.getBoundingClientRect();
-            const hHeight = header.offsetHeight;
-
-            let newLeft = startLeft + dx;
-            let newTop = startTop + dy;
-
-            // Ensure at least some part of the header is visible
-            newLeft = Math.max(
-                -(rect.width - minVisible),
-                Math.min(newLeft, viewportWidth - minVisible),
-            );
-            newTop = Math.max(
-                -(hHeight - minVisible),
-                Math.min(newTop, viewportHeight - minVisible),
-            );
-
-            dialog.style.left = `${newLeft}px`;
-            dialog.style.top = `${newTop}px`;
-            dialog.style.margin = "0";
-        } else if (isResizing && currentResizer) {
+        if (isResizing && currentResizer) {
             const dx = e.clientX - startX;
             const dy = e.clientY - startY;
             const minWidth = 150;
@@ -202,10 +166,8 @@ function render({ model, el }: RenderProps<WidgetModel>) {
     };
 
     const onMouseUp = () => {
-        isDragging = false;
         isResizing = false;
         currentResizer = null;
-        header.classList.remove("jphf-dragging");
     };
 
     const onResize = () => {
@@ -247,8 +209,11 @@ function render({ model, el }: RenderProps<WidgetModel>) {
     window.addEventListener("mouseup", onMouseUp);
     window.addEventListener("resize", onResize);
 
+    const dragCleanup = makeDraggable(dialog, header);
+
     return () => {
         dialog.remove();
+        dragCleanup();
         window.removeEventListener("mousemove", onMouseMove);
         window.removeEventListener("mouseup", onMouseUp);
         window.removeEventListener("resize", onResize);
