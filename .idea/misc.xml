@@ -4,6 +4,9 @@
     <option name="sdkName" value="uv (jupyter-host-file-picker)" />
   </component>
   <component name="ProjectRootManager" version="2" project-jdk-name="uv (jupyter-host-file-picker)" project-jdk-type="Python SDK" />
+  <component name="PythonCompatibilityInspectionAdvertiser">
+    <option name="version" value="3" />
+  </component>
   <component name="RuffConfiguration">
     <option name="enabled" value="true" />
   </component>
