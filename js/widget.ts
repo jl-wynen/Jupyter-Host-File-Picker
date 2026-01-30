@@ -273,6 +273,7 @@ function renderHeader(
     const path = document.createElement("input");
     path.type = "text";
     path.value = currentPath;
+    path.setAttribute("autofocus", "");
     // Do not move the window from the input element:
     path.addEventListener("mousedown", (e: MouseEvent) => e.stopPropagation());
     header.appendChild(path);
