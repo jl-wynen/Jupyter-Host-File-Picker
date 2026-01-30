@@ -5,7 +5,7 @@
     /*box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);*/
     width: 50em;
     height: 40em;
-    overflow: hidden;
+    overflow: visible;
     position: fixed;
     top: 100px;
     left: 100px;
@@ -25,73 +25,9 @@
     display: flex;
 }
 
-.resizer {
+.jphf-resizer {
     position: absolute;
     z-index: 10;
-}
-
-.resizer.n {
-    top: -5px;
-    left: 0;
-    right: 0;
-    height: 10px;
-    cursor: n-resize;
-}
-
-.resizer.s {
-    bottom: -5px;
-    left: 0;
-    right: 0;
-    height: 10px;
-    cursor: s-resize;
-}
-
-.resizer.e {
-    top: 0;
-    bottom: 0;
-    right: -5px;
-    width: 10px;
-    cursor: e-resize;
-}
-
-.resizer.w {
-    top: 0;
-    bottom: 0;
-    left: -5px;
-    width: 10px;
-    cursor: w-resize;
-}
-
-.resizer.nw {
-    top: -5px;
-    left: -5px;
-    width: 10px;
-    height: 10px;
-    cursor: nw-resize;
-}
-
-.resizer.ne {
-    top: -5px;
-    right: -5px;
-    width: 10px;
-    height: 10px;
-    cursor: ne-resize;
-}
-
-.resizer.sw {
-    bottom: -5px;
-    left: -5px;
-    width: 10px;
-    height: 10px;
-    cursor: sw-resize;
-}
-
-.resizer.se {
-    bottom: -5px;
-    right: -5px;
-    width: 10px;
-    height: 10px;
-    cursor: se-resize;
 }
 
 .jphf-nav-bar {
@@ -133,6 +69,7 @@
 .jphf-dialog-content {
     flex: 1 1 auto;
     min-height: 0;
+    overflow: hidden;
 }
 
 .jphf-dialog footer {
@@ -208,8 +145,9 @@
 
         &:hover {
             & path {
-            fill: var(--jp-ui-font-color3) !important;
+                fill: var(--jp-ui-font-color3) !important;
             }
+
             background: none;
         }
     }
