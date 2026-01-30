@@ -41,7 +41,7 @@ def _deduce_file_type(path: Path) -> str:
 
     mimetype = mimetypes.guess_type(path)[0]
     try:
-        return _KNOWN_MIMETYPES[mimetype]
+        return _KNOWN_MIMETYPES[mimetype]  # type: ignore[index]
     except KeyError:
         pass
     if mimetype is not None:

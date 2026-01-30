@@ -34,7 +34,7 @@ jobs:
       - name: Typecheck TypeScript
         run: npm run typecheck
       - name: Typecheck Python
-        run: uv run --group=dev mypy .
+        run: uv run --group=dev python -m mypy .
 
   tests:
     name: Tests
