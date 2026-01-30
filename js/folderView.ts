@@ -1,6 +1,6 @@
 import { FileInfo } from "./comm.ts";
 import { iconForFileType } from "./icons.ts";
-import { humanSize } from "./output.ts";
+import { humanSize, approxDurationSince } from "./output.ts";
 
 export class FolderView extends EventTarget {
     readonly container: HTMLDivElement;
@@ -23,6 +23,7 @@ export class FolderView extends EventTarget {
 
     showLoading() {
         this.clearLoading();
+        // @ts-ignore
         this.loadingTimeout = setTimeout(() => {
             const loading = document.createElement("div");
             loading.className = "jphf-loading";
@@ -48,6 +49,7 @@ export class FolderView extends EventTarget {
             return a.name.localeCompare(b.name);
         });
 
+        const now = new Date(Date.now());
         const [table, tbody] = createFileTableElement();
         for (const info of files) {
             const row = tbody.insertRow();
@@ -73,7 +75,9 @@ export class FolderView extends EventTarget {
 
             const modifiedCell = row.insertCell();
             modifiedCell.classList.add("jphf-file-modified-cell");
-            modifiedCell.textContent = info.modified;
+            const date = new Date(info.modified);
+            modifiedCell.textContent = approxDurationSince(date, now);
+            modifiedCell.title = date.toISOString();
 
             row.addEventListener("mousedown", (event: MouseEvent) => {
                 if (event.detail > 1) {
