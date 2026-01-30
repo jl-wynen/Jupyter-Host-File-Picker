@@ -24,9 +24,9 @@ class HostFilePicker(anywidget.AnyWidget):
     _css = pathlib.Path(__file__).parent / "static" / "widget.css"
 
     _dirPath = traitlets.Unicode().tag(sync=True)
-    _selected = traitlets.List().tag(sync=True)
+    _selected = traitlets.List(trait=traitlets.Unicode()).tag(sync=True)
 
-    selected = traitlets.List().tag()
+    selected = traitlets.List(trait=traitlets.Instance(Path)).tag()
 
     def __init__(self, initial_path: os.PathLike[str] | str = ".") -> None:
         initial_path = Path(initial_path).absolute()
