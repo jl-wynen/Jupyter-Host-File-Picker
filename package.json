@@ -1,19 +1,29 @@
 {
+    "type": "module",
     "scripts": {
         "dev": "npm run build -- --sourcemap=inline --watch",
         "build": "esbuild js/widget.ts --minify --format=esm --bundle --outdir=src/jupyter_host_file_picker/static --loader:.svg=text",
         "fix:prettier": "npm run lint:prettier -- --write",
         "lint:prettier": "prettier --config package.json --check",
-        "typecheck": "tsc --noEmit"
+        "typecheck": "tsc --noEmit",
+        "test": "mocha"
     },
     "dependencies": {
         "@jupyterlab/coreutils": "^6.5.3",
-        "@jupyterlab/ui-components": "^4.5.3"
+        "@jupyterlab/ui-components": "^4.5.3",
+        "date-fns": "^4.1.0"
     },
     "devDependencies": {
         "@anywidget/types": "^0.2.0",
+        "@types/chai": "^5.2.3",
+        "@types/jsdom": "^27.0.0",
+        "@types/mocha": "^10.0.10",
+        "chai": "^6.2.2",
         "esbuild": "^0.25.4",
+        "jsdom": "^27.4.0",
+        "mocha": "^11.7.5",
         "prettier": "^3.7.4",
+        "ts-node": "^10.9.2",
         "typescript": "^5.8.3"
     },
     "prettier": {
