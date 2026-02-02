@@ -61,7 +61,7 @@ def _list_dir(path: Path) -> dict[str, Any]:
     return {
         "type": "res:list-dir",
         "payload": {
-            "path": os.fspath(path),
+            "path": _format_folder_path(path),
             "segments": path.parts,
             "files": files,
         },
@@ -70,3 +70,10 @@ def _list_dir(path: Path) -> dict[str, Any]:
 
 def _list_parent(path: Path) -> dict[str, Any]:
     return _list_dir(path.parent)
+
+def _format_folder_path(path: Path) -> str:
+    """Return a str for a path with trailing separator."""
+    raw = os.fspath(path)
+    if raw.endswith(os.sep):
+        return raw
+    return raw + os.sep
