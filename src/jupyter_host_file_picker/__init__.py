@@ -46,4 +46,13 @@ def _handle_message(
     if content.get("type") == "req:list-dir":
         path = Path(content["payload"]["path"])
         files = [res for p in path.iterdir() if (res := inspect_file(p))]
-        widget.send({"type": "res:list-dir", "payload": files})
+        widget.send(
+            {
+                "type": "res:list-dir",
+                "payload": {
+                    "path": os.fspath(path),
+                    "segments": path.parts,
+                    "files": files,
+                },
+            }
+        )

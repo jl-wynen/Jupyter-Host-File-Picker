@@ -1,6 +1,6 @@
 import type { RenderProps } from "@anywidget/types";
 import "./widget.css";
-import { FileInfo } from "./comm.ts";
+import { FileInfo, ResListDirPayload, BackendComm } from "./comm.ts";
 import { FolderView, FileMarkedEvent, FileSelectedEvent } from "./folderView.ts";
 import { button, iconButton } from "./components.ts";
 import { backIcon, closeIcon, forwardIcon, upIcon } from "./icons.ts";
@@ -13,6 +13,8 @@ interface WidgetModel {
 }
 
 function render({ model, el }: RenderProps<WidgetModel>) {
+    const comm = new BackendComm(model);
+
     el.classList.add("jupyter-host-file-picker");
     el.style.position = "relative";
     el.style.display = "none";
@@ -35,7 +37,7 @@ function render({ model, el }: RenderProps<WidgetModel>) {
             model.set("_dirPath", fileInfo.path);
             pathInput.value = fileInfo.path;
             folderView.showLoading();
-            model.send({ type: "req:list-dir", payload: { path: fileInfo.path } });
+            comm.sendReqListDir({ path: fileInfo.path });
         } else {
             model.set("_selected", [fileInfo.path]);
             model.save_changes();
@@ -47,15 +49,12 @@ function render({ model, el }: RenderProps<WidgetModel>) {
         const event = e as FileSelectedEvent;
         selectFiles(event.fileInfo);
     });
-    model.on("msg:custom", (message) => {
+    comm.onResListDir((payload: ResListDirPayload) => {
         // TODO check folder path to make sure we get the message for the correct folder
-        if (message.type === "res:list-dir") {
-            const fileList = message.payload as FileInfo[];
-            folderView.populate(fileList);
-        }
+        folderView.populate(payload.files);
     });
     folderView.showLoading();
-    model.send({ type: "req:list-dir", payload: { path: model.get("_dirPath") } });
+    comm.sendReqListDir({ path: model.get("_dirPath") });
 
     dialog.appendChild(content);
 
