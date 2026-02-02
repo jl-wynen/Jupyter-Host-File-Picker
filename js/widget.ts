@@ -53,11 +53,14 @@ function render({ model, el }: RenderProps<WidgetModel>) {
         selectFiles(event.fileInfo);
     });
     comm.onResListDir((payload: ResListDirPayload) => {
-        console.log("Received list dir response:", payload);
-        // TODO check folder path to make sure we get the message for the correct folder
-        pathView.setTo(payload.path);
-        pathState.insertNew(payload.path);
-        folderView.populate(payload.files);
+        if (payload.isFile) {
+            selectFiles(payload.files);
+        } else {
+            // TODO check folder path to make sure we get the message for the correct folder
+            pathView.setTo(payload.path);
+            pathState.insertNew(payload.path);
+            folderView.populate(payload.files);
+        }
     });
     folderView.showLoading();
     comm.sendReqListDir({ path: pathState.current });
@@ -110,6 +113,7 @@ function renderHeader(
     );
 
     const pathView = new PathView(pathState, model.get("_pathSep"));
+    pathView.onInput((path: string) => comm.sendReqListDir({ path }));
     // Do not move the window from the input element:
     pathView.element.addEventListener("mousedown", (e: MouseEvent) =>
         e.stopPropagation(),

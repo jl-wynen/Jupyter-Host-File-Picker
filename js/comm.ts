@@ -17,6 +17,7 @@ export type ReqListDirPayload = {
 export type ResListDirPayload = {
     path: string;
     files: FileInfo[];
+    isFile: boolean;
 };
 
 /** Request listing the parent of a directory.

@@ -49,21 +49,34 @@ def _handle_message(
 ) -> None:
     match content.get("type"):
         case "req:list-dir":
-            widget.send(_list_dir(Path(content["payload"]["path"])))
+            payload = _list_dir(Path(content["payload"]["path"]))
         case "req:list-parent":
-            widget.send(_list_parent(Path(content["payload"]["path"])))
+            payload = _list_parent(Path(content["payload"]["path"]))
         case _:
             logging.getLogger(__name__).warning("Unknown message type: %s", content)
 
+    if payload is not None:
+        widget.send(payload)
 
-def _list_dir(path: Path) -> dict[str, Any]:
-    files = [res for p in path.iterdir() if (res := inspect_file(p))]
-    return {
-        "type": "res:list-dir",
-        "payload": {
+def _list_dir(path: Path) -> dict[str, Any]|None:
+    if not path.is_dir():
+        if (res := inspect_file(path)) is None:
+            return None
+        payload = {
+            "path":os.fspath(path),  # not a folder path
+            "files":[res],
+        "isFile"    :True,}
+    else:
+        files = [res for p in path.iterdir() if (res := inspect_file(p))]
+        payload = {
             "path": _format_folder_path(path),
             "files": files,
-        },
+            "isFile": False
+        }
+
+    return {
+        "type": "res:list-dir",
+        "payload": payload
     }
 
 

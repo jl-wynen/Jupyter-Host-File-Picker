@@ -64,4 +64,12 @@ export class PathView {
             this.el.value = this.pathState.current.slice(0, index) + this.pathSep;
         }
     }
+
+    onInput(callback: (path: string) => void) {
+        this.el.addEventListener("keydown", (event: KeyboardEvent) => {
+            if (event.key === "Enter") {
+                callback(this.el.value);
+            }
+        });
+    }
 }
