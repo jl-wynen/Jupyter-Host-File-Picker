@@ -1,6 +1,7 @@
 """Widget for selecting files on the Jupyter host."""
 
 import importlib.metadata
+import logging
 import os
 import pathlib
 from pathlib import Path
@@ -23,14 +24,17 @@ class HostFilePicker(anywidget.AnyWidget):
     _esm = pathlib.Path(__file__).parent / "static" / "widget.js"
     _css = pathlib.Path(__file__).parent / "static" / "widget.css"
 
-    _dirPath = traitlets.Unicode().tag(sync=True)
+    _initialPath = traitlets.Unicode().tag(sync=True)
+    _initialSegments = traitlets.List(trait=traitlets.Unicode()).tag(sync=True)
     _selected = traitlets.List(trait=traitlets.Unicode()).tag(sync=True)
 
     selected = traitlets.List(trait=traitlets.Instance(Path)).tag()
 
     def __init__(self, initial_path: os.PathLike[str] | str = ".") -> None:
         initial_path = Path(initial_path).absolute()
-        super().__init__(_dirPath=os.fspath(initial_path))
+        super().__init__(
+            _initialPath=os.fspath(initial_path), _initialSegments=initial_path.parts
+        )
 
         self.on_msg(_handle_message)
         self.observe(self._sync_selected, names="_selected")
@@ -43,16 +47,26 @@ class HostFilePicker(anywidget.AnyWidget):
 def _handle_message(
     widget: HostFilePicker, content: dict[str, Any], buffers: object
 ) -> None:
-    if content.get("type") == "req:list-dir":
-        path = Path(content["payload"]["path"])
-        files = [res for p in path.iterdir() if (res := inspect_file(p))]
-        widget.send(
-            {
-                "type": "res:list-dir",
-                "payload": {
-                    "path": os.fspath(path),
-                    "segments": path.parts,
-                    "files": files,
-                },
-            }
-        )
+    match content.get("type"):
+        case "req:list-dir":
+            widget.send(_list_dir(Path(content["payload"]["path"])))
+        case "req:list-parent":
+            widget.send(_list_parent(Path(content["payload"]["path"])))
+        case _:
+            logging.getLogger(__name__).warning("Unknown message type: %s", content)
+
+
+def _list_dir(path: Path) -> dict[str, Any]:
+    files = [res for p in path.iterdir() if (res := inspect_file(p))]
+    return {
+        "type": "res:list-dir",
+        "payload": {
+            "path": os.fspath(path),
+            "segments": path.parts,
+            "files": files,
+        },
+    }
+
+
+def _list_parent(path: Path) -> dict[str, Any]:
+    return _list_dir(path.parent)

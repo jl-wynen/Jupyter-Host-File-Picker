@@ -6,14 +6,20 @@ import { button, iconButton } from "./components.ts";
 import { backIcon, closeIcon, forwardIcon, upIcon } from "./icons.ts";
 import { SelectButton } from "./selectButton.ts";
 import { makeDraggable, makeResizable } from "./windowing.ts";
+import { PathState } from "./path.ts";
 
 interface WidgetModel {
-    _dirPath: string;
+    _initialPath: string;
+    _initialSegments: string[];
     _selected: string[];
 }
 
 function render({ model, el }: RenderProps<WidgetModel>) {
     const comm = new BackendComm(model);
+    const pathState = new PathState(
+        model.get("_initialPath"),
+        model.get("_initialSegments"),
+    );
 
     el.classList.add("jupyter-host-file-picker");
     el.style.position = "relative";
@@ -22,7 +28,7 @@ function render({ model, el }: RenderProps<WidgetModel>) {
     const dialog = document.createElement("dialog");
     dialog.className = "jphf-dialog";
 
-    const [header, pathInput] = renderHeader(dialog, model.get("_dirPath"));
+    const [header, pathInput] = renderHeader(dialog, comm, pathState);
     dialog.appendChild(header);
 
     const content = document.createElement("div");
@@ -34,7 +40,6 @@ function render({ model, el }: RenderProps<WidgetModel>) {
         // TODO handle multiple files
         const fileInfo = fileInfos[0];
         if (fileInfo.type === "folder") {
-            model.set("_dirPath", fileInfo.path);
             pathInput.value = fileInfo.path;
             folderView.showLoading();
             comm.sendReqListDir({ path: fileInfo.path });
@@ -50,11 +55,14 @@ function render({ model, el }: RenderProps<WidgetModel>) {
         selectFiles(event.fileInfo);
     });
     comm.onResListDir((payload: ResListDirPayload) => {
+        console.log("Received list dir response:", payload);
         // TODO check folder path to make sure we get the message for the correct folder
+        pathInput.value = payload.path;
+        pathState.insertNew(payload.path, payload.segments);
         folderView.populate(payload.files);
     });
     folderView.showLoading();
-    comm.sendReqListDir({ path: model.get("_dirPath") });
+    comm.sendReqListDir({ path: pathState.current });
 
     dialog.appendChild(content);
 
@@ -83,7 +91,8 @@ function render({ model, el }: RenderProps<WidgetModel>) {
 
 function renderHeader(
     dialog: HTMLDialogElement,
-    currentPath: string,
+    comm: BackendComm,
+    pathState: PathState,
 ): [HTMLElement, HTMLInputElement] {
     const header = document.createElement("header");
     header.classList.add("jphf-nav-bar");
@@ -94,11 +103,15 @@ function renderHeader(
     const forwardButton = iconButton(forwardIcon, "Next folder", () => {});
     forwardButton.setAttribute("disabled", "");
     header.appendChild(forwardButton);
-    header.appendChild(iconButton(upIcon, "Parent folder", () => {}));
+    header.appendChild(
+        iconButton(upIcon, "Parent folder", () => {
+            comm.sendReqListParent({ path: pathState.current });
+        }),
+    );
 
     const path = document.createElement("input");
     path.type = "text";
-    path.value = currentPath;
+    path.value = pathState.current;
     path.setAttribute("autofocus", "");
     // Do not move the window from the input element:
     path.addEventListener("mousedown", (e: MouseEvent) => e.stopPropagation());

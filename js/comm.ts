@@ -8,14 +8,24 @@ export type FileInfo = {
     type: string;
 };
 
+/** Request listing a directory. */
 export type ReqListDirPayload = {
     path: string;
 };
 
+/** Response for listing a directory. */
 export type ResListDirPayload = {
     path: string;
     segments: string[];
     files: FileInfo[];
+};
+
+/** Request listing the parent of a directory.
+ *
+ * The response to this request comes in as "res:list-dir".
+ */
+export type ReqListParentPayload = {
+    path: string;
 };
 
 export class BackendComm {
@@ -43,5 +53,9 @@ export class BackendComm {
 
     onResListDir(callback: (payload: ResListDirPayload) => void) {
         this.callbacks.set("res:list-dir", callback);
+    }
+
+    sendReqListParent(payload: ReqListParentPayload) {
+        this.model.send({ type: "req:list-parent", payload });
     }
 }
