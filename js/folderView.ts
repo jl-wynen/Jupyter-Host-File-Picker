@@ -6,11 +6,15 @@ export class FolderView extends EventTarget {
     readonly container: HTMLDivElement;
     private selected: FileInfo[] = [];
     private loadingTimeout: number | null = null;
+    private refreshInterval?: number;
 
     constructor() {
         super();
         this.container = document.createElement("div");
         this.container.classList.add("jphf-folder-view");
+
+        // @ts-ignore
+        this.refreshInterval = setInterval(() => this.refreshModifiedDates(), 60_000);
     }
 
     get element() {
@@ -37,6 +41,30 @@ export class FolderView extends EventTarget {
             clearTimeout(this.loadingTimeout);
             this.loadingTimeout = null;
         }
+    }
+
+    private refreshModifiedDates() {
+        if (!this.container.isConnected && this.refreshInterval !== null) {
+            // Automatically stop refreshing if the container has been removed.
+            this.stopRefreshing();
+            return;
+        }
+
+        const now = new Date();
+        const cells = this.container.querySelectorAll(".jphf-file-modified-cell");
+        for (const cell of cells) {
+            if (cell instanceof HTMLTableCellElement && cell.title) {
+                const date = new Date(cell.title);
+                if (!isNaN(date.getTime())) {
+                    cell.textContent = approxDurationSince(date, now);
+                }
+            }
+        }
+    }
+
+    private stopRefreshing() {
+        clearInterval(this.refreshInterval);
+        this.refreshInterval = undefined;
     }
 
     populate(files: FileInfo[]) {
