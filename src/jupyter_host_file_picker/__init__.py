@@ -25,7 +25,7 @@ class HostFilePicker(anywidget.AnyWidget):
     _css = pathlib.Path(__file__).parent / "static" / "widget.css"
 
     _initialPath = traitlets.Unicode().tag(sync=True)
-    _initialSegments = traitlets.List(trait=traitlets.Unicode()).tag(sync=True)
+    _pathSep = traitlets.Unicode().tag(sync=True)
     _selected = traitlets.List(trait=traitlets.Unicode()).tag(sync=True)
 
     selected = traitlets.List(trait=traitlets.Instance(Path)).tag()
@@ -33,7 +33,7 @@ class HostFilePicker(anywidget.AnyWidget):
     def __init__(self, initial_path: os.PathLike[str] | str = ".") -> None:
         initial_path = Path(initial_path).absolute()
         super().__init__(
-            _initialPath=os.fspath(initial_path), _initialSegments=initial_path.parts
+            _initialPath=_format_folder_path(initial_path),_pathSep=os.sep,
         )
 
         self.on_msg(_handle_message)
@@ -62,7 +62,6 @@ def _list_dir(path: Path) -> dict[str, Any]:
         "type": "res:list-dir",
         "payload": {
             "path": _format_folder_path(path),
-            "segments": path.parts,
             "files": files,
         },
     }

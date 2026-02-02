@@ -1,4 +1,4 @@
-import type { RenderProps } from "@anywidget/types";
+import type { AnyModel, RenderProps } from "@anywidget/types";
 import "./widget.css";
 import { FileInfo, ResListDirPayload, BackendComm } from "./comm.ts";
 import { FolderView, FileMarkedEvent, FileSelectedEvent } from "./folderView.ts";
@@ -6,20 +6,17 @@ import { button, iconButton } from "./components.ts";
 import { backIcon, closeIcon, forwardIcon, upIcon } from "./icons.ts";
 import { SelectButton } from "./selectButton.ts";
 import { makeDraggable, makeResizable } from "./windowing.ts";
-import { PathState } from "./path.ts";
+import { PathState, PathView } from "./path.ts";
 
 interface WidgetModel {
     _initialPath: string;
-    _initialSegments: string[];
+    _pathSep: string;
     _selected: string[];
 }
 
 function render({ model, el }: RenderProps<WidgetModel>) {
     const comm = new BackendComm(model);
-    const pathState = new PathState(
-        model.get("_initialPath"),
-        model.get("_initialSegments"),
-    );
+    const pathState = new PathState(model.get("_initialPath"));
 
     el.classList.add("jupyter-host-file-picker");
     el.style.position = "relative";
@@ -28,7 +25,7 @@ function render({ model, el }: RenderProps<WidgetModel>) {
     const dialog = document.createElement("dialog");
     dialog.className = "jphf-dialog";
 
-    const [header, pathInput] = renderHeader(dialog, comm, pathState);
+    const [header, pathView] = renderHeader(dialog, comm, model, pathState);
     dialog.appendChild(header);
 
     const content = document.createElement("div");
@@ -40,7 +37,8 @@ function render({ model, el }: RenderProps<WidgetModel>) {
         // TODO handle multiple files
         const fileInfo = fileInfos[0];
         if (fileInfo.type === "folder") {
-            pathInput.value = fileInfo.path;
+            // Set early to update before possibly slow response comes back:
+            pathView.setToProspective(fileInfo.path);
             folderView.showLoading();
             comm.sendReqListDir({ path: fileInfo.path });
         } else {
@@ -57,8 +55,8 @@ function render({ model, el }: RenderProps<WidgetModel>) {
     comm.onResListDir((payload: ResListDirPayload) => {
         console.log("Received list dir response:", payload);
         // TODO check folder path to make sure we get the message for the correct folder
-        pathInput.value = payload.path;
-        pathState.insertNew(payload.path, payload.segments);
+        pathView.setTo(payload.path);
+        pathState.insertNew(payload.path);
         folderView.populate(payload.files);
     });
     folderView.showLoading();
@@ -92,8 +90,9 @@ function render({ model, el }: RenderProps<WidgetModel>) {
 function renderHeader(
     dialog: HTMLDialogElement,
     comm: BackendComm,
+    model: AnyModel<WidgetModel>,
     pathState: PathState,
-): [HTMLElement, HTMLInputElement] {
+): [HTMLElement, PathView] {
     const header = document.createElement("header");
     header.classList.add("jphf-nav-bar");
 
@@ -105,17 +104,17 @@ function renderHeader(
     header.appendChild(forwardButton);
     header.appendChild(
         iconButton(upIcon, "Parent folder", () => {
+            pathView.setToParentProspective();
             comm.sendReqListParent({ path: pathState.current });
         }),
     );
 
-    const path = document.createElement("input");
-    path.type = "text";
-    path.value = pathState.current;
-    path.setAttribute("autofocus", "");
+    const pathView = new PathView(pathState, model.get("_pathSep"));
     // Do not move the window from the input element:
-    path.addEventListener("mousedown", (e: MouseEvent) => e.stopPropagation());
-    header.appendChild(path);
+    pathView.element.addEventListener("mousedown", (e: MouseEvent) =>
+        e.stopPropagation(),
+    );
+    header.appendChild(pathView.element);
 
     const closeButton = iconButton(closeIcon, "Close the file picker", () => {
         dialog.close();
@@ -123,7 +122,7 @@ function renderHeader(
     closeButton.classList.add("jphf-close-button");
     header.appendChild(closeButton);
 
-    return [header, path];
+    return [header, pathView];
 }
 
 function renderFooter(dialog: HTMLDialogElement): [HTMLElement, SelectButton] {

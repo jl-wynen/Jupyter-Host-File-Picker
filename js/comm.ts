@@ -16,7 +16,6 @@ export type ReqListDirPayload = {
 /** Response for listing a directory. */
 export type ResListDirPayload = {
     path: string;
-    segments: string[];
     files: FileInfo[];
 };
 
