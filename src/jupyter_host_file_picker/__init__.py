@@ -76,7 +76,7 @@ def _list_dir(path: Path) -> dict[str, Any] | None:
     return {"type": "res:list-dir", "payload": payload}
 
 
-def _list_parent(path: Path) -> dict[str, Any]:
+def _list_parent(path: Path) -> dict[str, Any]|None:
     return _list_dir(path.parent)
 
 
