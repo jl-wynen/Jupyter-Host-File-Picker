@@ -696,7 +696,6 @@ wheels = [
 
 [[package]]
 name = "jupyter-host-file-picker"
-version = "0.0.0"
 source = { editable = "." }
 dependencies = [
     { name = "anywidget" },
@@ -734,8 +733,8 @@ dev = [
     { name = "jupyterlab", specifier = ">=4.5.0" },
     { name = "mypy", specifier = ">=1.17" },
     { name = "pytest", specifier = ">=9" },
-    { name = "ruff" },
-    { name = "watchfiles" },
+    { name = "ruff", specifier = ">=0.14" },
+    { name = "watchfiles", specifier = ">=1.1" },
 ]
 test = [{ name = "pytest", specifier = ">=9" }]
 
