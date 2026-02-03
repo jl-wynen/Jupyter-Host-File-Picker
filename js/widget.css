@@ -1,8 +1,8 @@
 .jphf-dialog {
     padding: 0;
     border: 1px solid var(--jp-border-color1);
-    border-radius: 4px;
-    /*box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);*/
+    border-radius: 0;
+    box-shadow: 0 3px 15px rgba(0, 0, 0, 0.2);
     width: 50em;
     height: 40em;
     overflow: visible;
@@ -19,10 +19,11 @@
     box-sizing: border-box;
     display: none;
     flex-direction: column;
-}
+    container-type: inline-size;
 
-.jphf-dialog[open] {
-    display: flex;
+    &[open] {
+        display: flex;
+    }
 }
 
 .jphf-resizer {
@@ -32,17 +33,12 @@
 
 .jphf-nav-bar {
     background: var(--jp-layout-color2);
-    padding: 8px 12px;
+    padding: 0.3em 1em;
     cursor: grab;
     display: flex;
     align-items: center;
     user-select: none;
-    border-bottom: 1px solid var(--jp-border-color1);
-    gap: 8px;
-
-    &.jphf-dragging {
-        cursor: grabbing;
-    }
+    gap: 0.6em;
 
     & input[type="text"] {
         flex: 1;
@@ -51,7 +47,7 @@
         background: var(--jp-layout-color1);
         color: var(--jp-ui-font-color1);
         border: 1px solid var(--jp-border-color2);
-        border-radius: 2px;
+        border-radius: 0;
         padding: 2px 4px;
 
         &:focus {
@@ -66,6 +62,11 @@
     }
 }
 
+.jphf-dialog.jphf-dragging .jphf-nav-bar {
+    cursor: grabbing;
+}
+
+
 .jphf-dialog-content {
     flex: 1 1 auto;
     min-height: 0;
@@ -74,12 +75,12 @@
 
 .jphf-dialog footer {
     background: var(--jp-layout-color0);
-    padding: 8px 12px;
+    border-top: 1px solid var(--jp-border-color1);
+    padding: 0.5em 1em;
     display: flex;
     justify-content: space-between;
     align-items: center;
     user-select: none;
-    border-top: 1px solid var(--jp-border-color1);
 }
 
 .jphf-button[disabled] {
@@ -95,7 +96,6 @@
 
 .jphf-button:hover {
     color: var(--jp-ui-font-color0);
-    background: var(--jp-layout-color3);
 }
 
 .jphf-select-button {
@@ -104,7 +104,6 @@
 
     &:hover {
         color: var(--jp-ui-inverse-font-color0);
-        background: var(--jp-brand-color2);
     }
 }
 
@@ -154,7 +153,6 @@
 }
 
 .jphf-close-button {
-    background: var(--jp-layout-color4);
     border-radius: 50% !important;
 
     & svg {
@@ -163,7 +161,7 @@
     }
 
     &:hover {
-        background: var(--jp-error-color1);
+        background: var(--jp-error-color2);
     }
 }
 
@@ -177,6 +175,12 @@
     width: 100%;
     table-layout: auto;
     border-collapse: collapse;
+    font-size: var(--jp-ui-font-size1);
+
+    & td {
+        padding-top: 0.15em;
+        padding-bottom: 0.15em;
+    }
 
     & td:first-child {
         padding-left: 0.5em;
@@ -228,7 +232,7 @@
 }
 
 .jphf-file-icon-cell {
-    width: 1px;
+    width: 1px; /* the svg will set the size */
     white-space: nowrap;
     padding-right: 0.5ch;
 
