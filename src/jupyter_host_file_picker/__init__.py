@@ -33,7 +33,8 @@ class HostFilePicker(anywidget.AnyWidget):
     def __init__(self, initial_path: os.PathLike[str] | str = ".") -> None:
         initial_path = Path(initial_path).absolute()
         super().__init__(
-            _initialPath=_format_folder_path(initial_path),_pathSep=os.sep,
+            _initialPath=_format_folder_path(initial_path),
+            _pathSep=os.sep,
         )
 
         self.on_msg(_handle_message)
@@ -58,30 +59,26 @@ def _handle_message(
     if payload is not None:
         widget.send(payload)
 
-def _list_dir(path: Path) -> dict[str, Any]|None:
+
+def _list_dir(path: Path) -> dict[str, Any] | None:
     if not path.is_dir():
         if (res := inspect_file(path)) is None:
             return None
         payload = {
-            "path":os.fspath(path),  # not a folder path
-            "files":[res],
-        "isFile"    :True,}
+            "path": os.fspath(path),  # not a folder path
+            "files": [res],
+            "isFile": True,
+        }
     else:
         files = [res for p in path.iterdir() if (res := inspect_file(p))]
-        payload = {
-            "path": _format_folder_path(path),
-            "files": files,
-            "isFile": False
-        }
+        payload = {"path": _format_folder_path(path), "files": files, "isFile": False}
 
-    return {
-        "type": "res:list-dir",
-        "payload": payload
-    }
+    return {"type": "res:list-dir", "payload": payload}
 
 
 def _list_parent(path: Path) -> dict[str, Any]:
     return _list_dir(path.parent)
+
 
 def _format_folder_path(path: Path) -> str:
     """Return a str for a path with trailing separator."""
