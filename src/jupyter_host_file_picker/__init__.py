@@ -1,6 +1,7 @@
 """Widget for selecting files on the Jupyter host."""
 
 import importlib.metadata
+import logging
 import os
 import pathlib
 from pathlib import Path
@@ -23,14 +24,18 @@ class HostFilePicker(anywidget.AnyWidget):
     _esm = pathlib.Path(__file__).parent / "static" / "widget.js"
     _css = pathlib.Path(__file__).parent / "static" / "widget.css"
 
-    _dirPath = traitlets.Unicode().tag(sync=True)
+    _initialPath = traitlets.Unicode().tag(sync=True)
+    _pathSep = traitlets.Unicode().tag(sync=True)
     _selected = traitlets.List(trait=traitlets.Unicode()).tag(sync=True)
 
     selected = traitlets.List(trait=traitlets.Instance(Path)).tag()
 
     def __init__(self, initial_path: os.PathLike[str] | str = ".") -> None:
         initial_path = Path(initial_path).absolute()
-        super().__init__(_dirPath=os.fspath(initial_path))
+        super().__init__(
+            _initialPath=_format_folder_path(initial_path),
+            _pathSep=os.sep,
+        )
 
         self.on_msg(_handle_message)
         self.observe(self._sync_selected, names="_selected")
@@ -43,7 +48,41 @@ class HostFilePicker(anywidget.AnyWidget):
 def _handle_message(
     widget: HostFilePicker, content: dict[str, Any], buffers: object
 ) -> None:
-    if content.get("type") == "req:list-dir":
-        path = Path(content["payload"]["path"])
+    match content.get("type"):
+        case "req:list-dir":
+            payload = _list_dir(Path(content["payload"]["path"]))
+        case "req:list-parent":
+            payload = _list_parent(Path(content["payload"]["path"]))
+        case _:
+            logging.getLogger(__name__).warning("Unknown message type: %s", content)
+
+    if payload is not None:
+        widget.send(payload)
+
+
+def _list_dir(path: Path) -> dict[str, Any] | None:
+    if not path.is_dir():
+        if (res := inspect_file(path)) is None:
+            return None
+        payload = {
+            "path": os.fspath(path),  # not a folder path
+            "files": [res],
+            "isFile": True,
+        }
+    else:
         files = [res for p in path.iterdir() if (res := inspect_file(p))]
-        widget.send({"type": "res:list-dir", "payload": files})
+        payload = {"path": _format_folder_path(path), "files": files, "isFile": False}
+
+    return {"type": "res:list-dir", "payload": payload}
+
+
+def _list_parent(path: Path) -> dict[str, Any] | None:
+    return _list_dir(path.parent)
+
+
+def _format_folder_path(path: Path) -> str:
+    """Return a str for a path with trailing separator."""
+    raw = os.fspath(path)
+    if raw.endswith(os.sep):
+        return raw
+    return raw + os.sep

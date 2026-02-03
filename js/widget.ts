@@ -1,18 +1,23 @@
-import type { RenderProps } from "@anywidget/types";
+import type { AnyModel, RenderProps } from "@anywidget/types";
 import "./widget.css";
-import { FileInfo } from "./comm.ts";
+import { FileInfo, ResListDirPayload, BackendComm } from "./comm.ts";
 import { FolderView, FileMarkedEvent, FileSelectedEvent } from "./folderView.ts";
 import { button, iconButton } from "./components.ts";
 import { backIcon, closeIcon, forwardIcon, upIcon } from "./icons.ts";
 import { SelectButton } from "./selectButton.ts";
 import { makeDraggable, makeResizable } from "./windowing.ts";
+import { PathState, PathView } from "./path.ts";
 
 interface WidgetModel {
-    _dirPath: string;
+    _initialPath: string;
+    _pathSep: string;
     _selected: string[];
 }
 
 function render({ model, el }: RenderProps<WidgetModel>) {
+    const comm = new BackendComm(model);
+    const pathState = new PathState(model.get("_initialPath"));
+
     el.classList.add("jupyter-host-file-picker");
     el.style.position = "relative";
     el.style.display = "none";
@@ -20,7 +25,7 @@ function render({ model, el }: RenderProps<WidgetModel>) {
     const dialog = document.createElement("dialog");
     dialog.className = "jphf-dialog";
 
-    const [header, pathInput] = renderHeader(dialog, model.get("_dirPath"));
+    const [header, pathView] = renderHeader(dialog, comm, model, pathState);
     dialog.appendChild(header);
 
     const content = document.createElement("div");
@@ -32,10 +37,10 @@ function render({ model, el }: RenderProps<WidgetModel>) {
         // TODO handle multiple files
         const fileInfo = fileInfos[0];
         if (fileInfo.type === "folder") {
-            model.set("_dirPath", fileInfo.path);
-            pathInput.value = fileInfo.path;
+            // Set early to update before possibly slow response comes back:
+            pathView.setToProspective(fileInfo.path);
             folderView.showLoading();
-            model.send({ type: "req:list-dir", payload: { path: fileInfo.path } });
+            comm.sendReqListDir({ path: fileInfo.path });
         } else {
             model.set("_selected", [fileInfo.path]);
             model.save_changes();
@@ -47,15 +52,18 @@ function render({ model, el }: RenderProps<WidgetModel>) {
         const event = e as FileSelectedEvent;
         selectFiles(event.fileInfo);
     });
-    model.on("msg:custom", (message) => {
-        // TODO check folder path to make sure we get the message for the correct folder
-        if (message.type === "res:list-dir") {
-            const fileList = message.payload as FileInfo[];
-            folderView.populate(fileList);
+    comm.onResListDir((payload: ResListDirPayload) => {
+        if (payload.isFile) {
+            selectFiles(payload.files);
+        } else {
+            // TODO check folder path to make sure we get the message for the correct folder
+            pathView.setTo(payload.path);
+            pathState.insertNew(payload.path);
+            folderView.populate(payload.files);
         }
     });
     folderView.showLoading();
-    model.send({ type: "req:list-dir", payload: { path: model.get("_dirPath") } });
+    comm.sendReqListDir({ path: pathState.current });
 
     dialog.appendChild(content);
 
@@ -84,8 +92,10 @@ function render({ model, el }: RenderProps<WidgetModel>) {
 
 function renderHeader(
     dialog: HTMLDialogElement,
-    currentPath: string,
-): [HTMLElement, HTMLInputElement] {
+    comm: BackendComm,
+    model: AnyModel<WidgetModel>,
+    pathState: PathState,
+): [HTMLElement, PathView] {
     const header = document.createElement("header");
     header.classList.add("jphf-nav-bar");
 
@@ -95,15 +105,20 @@ function renderHeader(
     const forwardButton = iconButton(forwardIcon, "Next folder", () => {});
     forwardButton.setAttribute("disabled", "");
     header.appendChild(forwardButton);
-    header.appendChild(iconButton(upIcon, "Parent folder", () => {}));
+    header.appendChild(
+        iconButton(upIcon, "Parent folder", () => {
+            pathView.setToParentProspective();
+            comm.sendReqListParent({ path: pathState.current });
+        }),
+    );
 
-    const path = document.createElement("input");
-    path.type = "text";
-    path.value = currentPath;
-    path.setAttribute("autofocus", "");
+    const pathView = new PathView(pathState, model.get("_pathSep"));
+    pathView.onInput((path: string) => comm.sendReqListDir({ path }));
     // Do not move the window from the input element:
-    path.addEventListener("mousedown", (e: MouseEvent) => e.stopPropagation());
-    header.appendChild(path);
+    pathView.element.addEventListener("mousedown", (e: MouseEvent) =>
+        e.stopPropagation(),
+    );
+    header.appendChild(pathView.element);
 
     const closeButton = iconButton(closeIcon, "Close the file picker", () => {
         dialog.close();
@@ -111,7 +126,7 @@ function renderHeader(
     closeButton.classList.add("jphf-close-button");
     header.appendChild(closeButton);
 
-    return [header, path];
+    return [header, pathView];
 }
 
 function renderFooter(dialog: HTMLDialogElement): [HTMLElement, SelectButton] {
