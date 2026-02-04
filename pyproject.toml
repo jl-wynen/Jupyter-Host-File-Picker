@@ -7,6 +7,17 @@ name = "jupyter_host_file_picker"
 dynamic = ["version"]
 readme = "README.md"
 description = "File picker widget for the host filesystem in Jupyter."
+classifiers = [
+  "Framework :: Jupyter",
+  "Framework :: Jupyter :: JupyterLab",
+  "Framework :: Jupyter :: JupyterLab :: 4",
+  "Framework :: Jupyter :: JupyterLab :: Extensions",
+  "Framework :: Jupyter :: JupyterLab :: Extensions :: Prebuilt",
+  "Natural Language :: English",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3",
+]
 requires-python = ">=3.11"
 dependencies = [
     "anywidget>=0.9.21",
@@ -21,9 +32,6 @@ dev = [
     "mypy >= 1.17",
     "ruff>=0.14",
     "watchfiles>=1.1"
-]
-build = [
-    "build >= 1.3.0",
 ]
 test = [
     "pytest>=9",
