@@ -17,10 +17,11 @@ import {
     closeIcon as jpCloseIcon,
 } from "@jupyterlab/ui-components";
 import hdfSvg from "./assets/hdf.svg";
+import { FileType } from "./fileType";
 
 const hdfIcon = new LabIcon({ name: "jphf:hdf", svgstr: hdfSvg });
 
-export function iconForFileType(fileType: string): LabIcon {
+export function iconForFileType(fileType: FileType): LabIcon {
     switch (fileType) {
         case "folder":
             return folderIcon;
