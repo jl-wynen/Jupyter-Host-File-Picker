@@ -6,14 +6,13 @@ export class FolderView extends EventTarget {
     readonly container: HTMLDivElement;
     private selected: FileInfo[] = [];
     private loadingTimeout: number | null = null;
-    private refreshInterval?: number;
+    private refreshInterval?: NodeJS.Timeout;
 
     constructor() {
         super();
         this.container = document.createElement("div");
         this.container.classList.add("jphf-folder-view");
 
-        // @ts-ignore
         this.refreshInterval = setInterval(() => this.refreshModifiedDates(), 60_000);
     }
 
