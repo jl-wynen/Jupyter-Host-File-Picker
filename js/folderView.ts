@@ -34,10 +34,6 @@ export class FolderView extends EventTarget {
                 this.setCurrent(0);
             } else if (event.key === "End") {
                 this.setCurrent(this.fileInfos.length - 1);
-            } else if (event.key === "Escape") {
-                event.preventDefault();
-                event.stopPropagation();
-                // TODO close
             } else if (event.key === "Enter" || event.key == "NumpadEnter") {
                 event.preventDefault();
                 event.stopPropagation();
