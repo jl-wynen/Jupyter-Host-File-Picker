@@ -12,6 +12,17 @@ export class FolderView extends EventTarget {
         super();
         this.container = document.createElement("div");
         this.container.classList.add("jphf-folder-view");
+        this.container.tabIndex = 0; // needs to be focusable for keyboard events
+
+        this.container.addEventListener("keydown", (event: KeyboardEvent) => {
+            if (event.key === "Escape") {
+                // TODO close
+            } else if (event.key === "Enter" || event.key == "NumpadEnter") {
+                event.preventDefault();
+                event.stopPropagation();
+                this.dispatchEvent(new FileSelectedEvent(this.selected));
+            }
+        });
 
         // @ts-ignore
         this.refreshInterval = setInterval(() => this.refreshModifiedDates(), 60_000);
@@ -121,6 +132,7 @@ export class FolderView extends EventTarget {
                 }
                 row.ariaSelected = "true";
                 this.selected = [info];
+                this.container.focus();
                 this.dispatchEvent(new FileMarkedEvent([info]));
             });
 
