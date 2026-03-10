@@ -12,6 +12,7 @@ import {
     caretUpIcon,
     pdfIcon,
     videoIcon,
+    refreshIcon,
     yamlIcon,
     closeIcon as jpCloseIcon,
 } from "@jupyterlab/ui-components";
@@ -48,6 +49,7 @@ export function iconForFileType(fileType: string): LabIcon {
     }
 }
 
+export const circleArrowIcon = refreshIcon;
 export const closeIcon = jpCloseIcon;
 export const homeIcon = jpHomeIcon;
 export const upIcon = caretUpIcon;
