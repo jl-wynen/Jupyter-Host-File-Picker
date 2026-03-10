@@ -9,8 +9,6 @@ import {
     pythonIcon,
     spreadsheetIcon,
     caretUpIcon,
-    caretRightIcon,
-    caretLeftIcon,
     pdfIcon,
     videoIcon,
     yamlIcon,
@@ -49,7 +47,5 @@ export function iconForFileType(fileType: string): LabIcon {
     }
 }
 
-export const backIcon = caretLeftIcon;
-export const forwardIcon = caretRightIcon;
 export const upIcon = caretUpIcon;
 export const closeIcon = jpCloseIcon;
