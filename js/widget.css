@@ -126,8 +126,8 @@
     align-items: center;
     justify-content: center;
     padding: 0;
-    width: 1.5em;
-    height: 1.5em;
+    width: 1.2em;
+    height: 1.2em;
     line-height: 0;
 
     & svg {
@@ -165,10 +165,26 @@
             background: none;
         }
     }
+
+}
+
+.jphf-nav-bar {
+    /* Adjust individual icon buttons to get a consistent size */
+    button:nth-child(1){
+        width: 1.5em;
+        height: 1.5em;
+    }
+
+    button:nth-child(2){
+        width: 1em;
+        height: 1em;
+    }
 }
 
 .jphf-close-button {
     border-radius: 50% !important;
+    width: 1.5em;
+    height: 1.5em;
 
     svg {
         width: 75%;

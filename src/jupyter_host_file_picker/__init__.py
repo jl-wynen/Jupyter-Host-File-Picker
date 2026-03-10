@@ -56,6 +56,8 @@ def _handle_message(
             message = _list_parent(Path(content["payload"]["path"]))
         case "req:list-home":
             message = _list_dir(Path.home())
+        case "req:list-cwd":
+            message = _list_dir(Path.cwd())
         case _:
             logging.getLogger(__name__).warning("Unknown message type: %s", content)
 

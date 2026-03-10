@@ -3,7 +3,13 @@ import "./widget.css";
 import { FileInfo, ResListDirPayload, BackendComm } from "./comm.ts";
 import { FolderView, FileMarkedEvent, FileSelectedEvent } from "./folderView.ts";
 import { button, iconButton } from "./components.ts";
-import { closeIcon, circleArrowIcon, homeIcon, upIcon } from "./icons.ts";
+import {
+    closeIcon,
+    workingDirIcon,
+    circleArrowIcon,
+    homeIcon,
+    upIcon,
+} from "./icons.ts";
 import { SelectButton } from "./selectButton.ts";
 import { makeDraggable, makeResizable } from "./windowing.ts";
 import { PathView } from "./path.ts";
@@ -110,6 +116,12 @@ function renderHeader(
         iconButton(upIcon, "Parent folder", () => {
             pathView.setToParentProspective();
             comm.sendReqListParent({ path: pathView.current });
+        }),
+    );
+
+    header.appendChild(
+        iconButton(workingDirIcon, "Current working directory", () => {
+            comm.sendReqListCwd();
         }),
     );
 
