@@ -62,3 +62,45 @@ def _deduce_file_type(path: Path) -> str:
             return "hdf"
 
     return "file"
+
+
+# Taken from
+# https://discuss.python.org/t/os-path-ishidden-pathlib-path-is-hidden-os-direntry-is-hidden/50263
+# by user 'Nice Zombies' (Nineteendo)
+if os.name == "nt":  # ntpath.py
+    if hasattr(os.stat_result, "st_file_attributes"):  # Windows
+
+        def ishidden(path: os.PathLike[str]) -> bool:
+            """Test whether a path is hidden."""
+            from stat import FILE_ATTRIBUTE_HIDDEN
+
+            try:
+                st = os.stat(path)
+            except (OSError, ValueError):
+                return True
+
+            return bool(st.st_file_attributes & FILE_ATTRIBUTE_HIDDEN)  # type: ignore[attr-defined]
+    else:
+
+        def ishidden(path: os.PathLike[str]) -> bool:
+            """Test whether a path is hidden."""
+            os.fspath(path)
+            return False
+else:  # posixpath.py
+    if hasattr(os.stat_result, "st_reparse_tag"):  # macOS
+
+        def ishidden(path: os.PathLike[str]) -> bool:
+            """Test whether a path is hidden."""
+            from stat import UF_HIDDEN
+
+            try:
+                st = os.stat(path)
+            except (OSError, ValueError):
+                return True
+
+            return bool(st.st_flags & UF_HIDDEN)  # type: ignore[attr-defined]
+    else:  # Unix
+
+        def is_hidden(path: os.PathLike[str]) -> bool:
+            """Test whether a path is hidden."""
+            return os.path.basename(os.fspath(path)).startswith(".")
