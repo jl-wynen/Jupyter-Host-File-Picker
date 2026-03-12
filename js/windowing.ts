@@ -28,7 +28,7 @@ export function makeDraggable(
         const target = e.target as HTMLElement | null;
         if (
             target?.closest(
-                'button, input, textarea, select, option, a, [role="button"]',
+                'button, input, textarea, select, option, a, [role="button"], label',
             )
         ) {
             // Do not allow dragging from interactive elements.

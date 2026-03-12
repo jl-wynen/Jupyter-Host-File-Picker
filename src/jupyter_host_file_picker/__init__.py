@@ -10,7 +10,7 @@ from typing import Any
 import anywidget
 import traitlets
 
-from ._filesystem import inspect_file
+from ._filesystem import inspect_file, is_hidden
 
 try:
     __version__ = importlib.metadata.version("jupyter_host_file_picker")
@@ -55,6 +55,7 @@ class HostFilePicker(anywidget.AnyWidget):
             if initial_path is None
             else _format_folder_path(Path(initial_path).absolute()),
             _pathSep=os.sep,
+            _remember=remember,
         )
 
         self.on_msg(_handle_message)
@@ -71,15 +72,21 @@ def _handle_message(
     message = None
     match content.get("type"):
         case "req:list-dir":
-            message = _list_dir(Path(content["payload"]["path"]))
+            message = _list_dir(
+                Path(content["payload"]["path"]), content["payload"]["showHidden"]
+            )
         case "req:list-parent":
-            message = _list_parent(Path(content["payload"]["path"]))
+            message = _list_parent(
+                Path(content["payload"]["path"]), content["payload"]["showHidden"]
+            )
         case "req:list-home":
-            message = _list_dir(Path.home())
+            message = _list_dir(Path.home(), content["payload"]["showHidden"])
         case "req:list-cwd":
-            message = _list_dir(Path.cwd())
+            message = _list_dir(Path.cwd(), content["payload"]["showHidden"])
         case "req:list-dir-with-fallback":
-            message = _list_dir_with_fallback(Path(content["payload"]["path"]))
+            message = _list_dir_with_fallback(
+                Path(content["payload"]["path"]), content["payload"]["showHidden"]
+            )
         case _:
             logging.getLogger(__name__).warning("Unknown message type: %s", content)
 
@@ -87,7 +94,7 @@ def _handle_message(
         widget.send(message)
 
 
-def _list_dir(path: Path) -> dict[str, Any] | None:
+def _list_dir(path: Path, show_hidden: bool) -> dict[str, Any] | None:
     if not path.is_dir():
         if (res := inspect_file(path)) is None:
             return None
@@ -97,21 +104,32 @@ def _list_dir(path: Path) -> dict[str, Any] | None:
             "isFile": True,
         }
     else:
-        files = [res for p in path.iterdir() if (res := inspect_file(p))]
+        if show_hidden:
+
+            def filter_path(p: Path) -> bool:
+                return True
+        else:
+
+            def filter_path(p: Path) -> bool:
+                return not is_hidden(p)
+
+        files = [
+            res for p in path.iterdir() if filter_path(p) and (res := inspect_file(p))
+        ]
         payload = {"path": _format_folder_path(path), "files": files, "isFile": False}
 
     return {"type": "res:list-dir", "payload": payload}
 
 
-def _list_dir_with_fallback(path: Path) -> dict[str, Any] | None:
-    requested = _list_dir(path)
+def _list_dir_with_fallback(path: Path, show_hidden: bool) -> dict[str, Any] | None:
+    requested = _list_dir(path, show_hidden)
     if requested is None:
-        return _list_dir(Path.cwd())
+        return _list_dir(Path.cwd(), show_hidden)
     return requested
 
 
-def _list_parent(path: Path) -> dict[str, Any] | None:
-    return _list_dir(path.parent)
+def _list_parent(path: Path, show_hidden: bool) -> dict[str, Any] | None:
+    return _list_dir(path.parent, show_hidden)
 
 
 def _format_folder_path(path: Path) -> str:

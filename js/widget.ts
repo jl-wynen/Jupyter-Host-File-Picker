@@ -2,18 +2,19 @@ import type { AnyModel, RenderProps } from "@anywidget/types";
 import "./widget.css";
 import { FileInfo, ResListDirPayload, BackendComm } from "./comm.ts";
 import { FolderView, FileMarkedEvent, FileSelectedEvent } from "./folderView.ts";
-import { button, iconButton } from "./components.ts";
+import { button, toggleButton, iconButton } from "./components.ts";
 import {
     closeIcon,
     workingDirIcon,
     circleArrowIcon,
     homeIcon,
+    showHiddenIcon,
     upIcon,
 } from "./icons.ts";
 import { SelectButton } from "./selectButton.ts";
 import { makeDraggable, makeResizable } from "./windowing.ts";
 import { PathView } from "./path.ts";
-import { getLatestPath } from "./storage.ts";
+import { getLatestPath, getShowHidden, setShowHidden } from "./storage.ts";
 
 interface WidgetModel {
     _initialPath: string | null;
@@ -32,7 +33,7 @@ function render({ model, el }: RenderProps<WidgetModel>) {
     const dialog = document.createElement("dialog");
     dialog.className = "jphf-dialog";
 
-    const [header, pathView] = renderHeader(dialog, comm, model);
+    const [header, pathView, showHiddenToggle] = renderHeader(dialog, comm, model);
     dialog.appendChild(header);
 
     const content = document.createElement("div");
@@ -47,7 +48,10 @@ function render({ model, el }: RenderProps<WidgetModel>) {
             // Set early to update before possibly slow response comes back:
             pathView.setToProspective(fileInfo.path);
             folderView.showLoading();
-            comm.sendReqListDir({ path: fileInfo.path });
+            comm.sendReqListDir({
+                path: fileInfo.path,
+                showHidden: showHiddenToggle.checked,
+            });
         } else {
             model.set("_selected", [fileInfo.path]);
             model.save_changes();
@@ -105,7 +109,7 @@ function renderHeader(
     dialog: HTMLDialogElement,
     comm: BackendComm,
     model: AnyModel<WidgetModel>,
-): [HTMLElement, PathView] {
+): [HTMLElement, PathView, HTMLInputElement] {
     const pathView = new PathView(
         model.get("_initialPath") || ".",
         model.get("_pathSep"),
@@ -116,37 +120,60 @@ function renderHeader(
     const header = document.createElement("header");
     header.classList.add("jphf-nav-bar");
 
+    const [showHiddenElement, showHiddenToggle] = toggleButton(
+        showHiddenIcon,
+        "Show hidden files",
+        () => {
+            if (model.get("_remember")) {
+                setShowHidden(showHiddenToggle.checked);
+            }
+            refreshButton.click();
+        },
+    );
+    if (getShowHidden()) {
+        showHiddenToggle.checked = true;
+    }
+
     header.appendChild(
         iconButton(upIcon, "Parent folder", () => {
             pathView.setToParentProspective();
-            comm.sendReqListParent({ path: pathView.current });
+            comm.sendReqListParent({
+                path: pathView.current,
+                showHidden: showHiddenToggle.checked,
+            });
         }),
     );
 
     header.appendChild(
         iconButton(workingDirIcon, "Current working directory", () => {
-            comm.sendReqListCwd();
+            comm.sendReqListCwd({ showHidden: showHiddenToggle.checked });
         }),
     );
 
     header.appendChild(
         iconButton(homeIcon, "Home", () => {
-            comm.sendReqListHome();
+            comm.sendReqListHome({ showHidden: showHiddenToggle.checked });
         }),
     );
 
-    header.appendChild(
-        iconButton(circleArrowIcon, "Refresh", () => {
-            comm.sendReqListDir({ path: pathView.current });
-        }),
-    );
+    const refreshButton = iconButton(circleArrowIcon, "Refresh", () => {
+        comm.sendReqListDir({
+            path: pathView.current,
+            showHidden: showHiddenToggle.checked,
+        });
+    });
+    header.appendChild(refreshButton);
 
-    pathView.onInput((path: string) => comm.sendReqListDir({ path }));
+    pathView.onInput((path: string) =>
+        comm.sendReqListDir({ path, showHidden: showHiddenToggle.checked }),
+    );
     // Do not move the window from the input element:
     pathView.element.addEventListener("mousedown", (e: MouseEvent) =>
         e.stopPropagation(),
     );
     header.appendChild(pathView.element);
+
+    header.appendChild(showHiddenElement);
 
     const closeButton = iconButton(closeIcon, "Close the file picker", () => {
         dialog.close();
@@ -154,7 +181,7 @@ function renderHeader(
     closeButton.classList.add("jphf-close-button");
     header.appendChild(closeButton);
 
-    return [header, pathView];
+    return [header, pathView, showHiddenToggle];
 }
 
 function renderFooter(dialog: HTMLDialogElement): [HTMLElement, SelectButton] {
@@ -172,7 +199,7 @@ function listInitialDir(comm: BackendComm, model: AnyModel<WidgetModel>) {
     // Make sure that we always have a valid path to list.
     // CWD should be a good fallback.
     const path = model.get("_initialPath") || getLatestPath() || ".";
-    comm.sendReqListDirWithFallback({ path });
+    comm.sendReqListDirWithFallback({ path, showHidden: getShowHidden() ?? false });
 }
 
 export default { render };

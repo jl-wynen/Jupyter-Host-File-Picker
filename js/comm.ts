@@ -12,6 +12,7 @@ export type FileInfo = {
 /** Request listing a directory. */
 export type ReqListDirPayload = {
     path: string;
+    showHidden: boolean;
 };
 
 /** Response for listing a directory. */
@@ -27,6 +28,17 @@ export type ResListDirPayload = {
  */
 export type ReqListParentPayload = {
     path: string;
+    showHidden: boolean;
+};
+
+/** Request listing the home directory. */
+export type ReqListHomePayload = {
+    showHidden: boolean;
+};
+
+/** Request listing the current working directory. */
+export type ReqListCwdPayload = {
+    showHidden: boolean;
 };
 
 export class BackendComm {
@@ -60,12 +72,12 @@ export class BackendComm {
         this.model.send({ type: "req:list-parent", payload });
     }
 
-    sendReqListHome() {
-        this.model.send({ type: "req:list-home", payload: {} });
+    sendReqListHome(payload: ReqListHomePayload) {
+        this.model.send({ type: "req:list-home", payload });
     }
 
-    sendReqListCwd() {
-        this.model.send({ type: "req:list-cwd", payload: {} });
+    sendReqListCwd(payload: ReqListCwdPayload) {
+        this.model.send({ type: "req:list-cwd", payload });
     }
 
     /**

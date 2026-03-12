@@ -45,9 +45,10 @@
     user-select: none;
     gap: 0.6em;
 
-    & input[type="text"] {
+    input[type="text"] {
         flex: 1;
-        margin: 0 4em;
+        margin-left: 4em;
+        margin-right: 0.5em;
         min-width: 0;
         background: var(--jp-layout-color1);
         color: var(--jp-ui-font-color1);
@@ -64,6 +65,10 @@
             background: var(--jp-editor-selected-background);
         }
 
+    }
+
+    .jphf-close-button {
+        margin-left: 4em;
     }
 }
 
@@ -118,7 +123,7 @@
     }
 }
 
-.jphf-icon-button {
+.jphf-icon-button, .jphf-toggle-button {
     background: none;
     border: none;
     cursor: default;
@@ -147,7 +152,9 @@
             fill: var(--jp-ui-font-color0);
         }
     }
+}
 
+.jphf-icon-button {
     &:active {
         background: var(--jp-layout-color4);
     }
@@ -170,14 +177,39 @@
 
 .jphf-nav-bar {
     /* Adjust individual icon buttons to get a consistent size */
-    button:nth-child(1){
+    button:nth-child(1) svg {
         width: 1.5em;
         height: 1.5em;
     }
 
-    button:nth-child(2){
+    button:nth-child(2) svg {
         width: 1em;
         height: 1em;
+    }
+}
+
+.jphf-toggle-button {
+    position:relative;
+
+    input {
+        display: none;
+    }
+
+    span {
+        position: absolute;
+        inset: 1px;
+        display: block;
+        box-sizing: border-box;
+
+        path {
+            fill: var(--jp-ui-font-color3) !important;
+        }
+    }
+
+    input:checked + span {
+        path {
+            fill: var(--jp-ui-font-color1) !important;
+        }
     }
 }
 
